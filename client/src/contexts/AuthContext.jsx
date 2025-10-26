@@ -1,7 +1,7 @@
-import { createContext, useState, useEffect, useContext } from 'react';
+// src/contexts/AuthContext.jsx
+import { useState, useEffect } from 'react';
+import { AuthContext } from './AuthContext.js';
 import api from '../services/api';
-
-const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -11,11 +11,14 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
+  // Check if user is already logged in
   const checkAuth = async () => {
     const token = localStorage.getItem('token');
     if (token) {
       try {
-        const response = await api.get('/auth/me');
+        const response = await api.get('/auth/me', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
         setUser(response.data);
       } catch (error) {
         console.error('Auth check failed:', error);
@@ -25,20 +28,25 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   };
 
+  // Login function
+
   const login = async (email, password) => {
     const response = await api.post('/auth/login', { email, password });
     localStorage.setItem('token', response.data.token);
-    setUser(response.data.user);
+    setUser(response.data);
     return response.data;
   };
+
+  // Register function
 
   const register = async (name, email, password) => {
     const response = await api.post('/auth/register', { name, email, password });
     localStorage.setItem('token', response.data.token);
-    setUser(response.data.user);
+    setUser(response.data);
     return response.data;
   };
 
+  // Logout function
   const logout = () => {
     localStorage.removeItem('token');
     setUser(null);
@@ -51,10 +59,3 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within AuthProvider');
-  }
-  return context;
-};

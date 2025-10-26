@@ -1,13 +1,15 @@
+// src/App.jsx
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
-
-// Pages (we'll create these)
+import { AuthProvider } from './contexts/AuthContext.jsx'; // make sure AuthProvider is exported
+import { useAuth } from './hooks/useAuth';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Expenses from './pages/Expenses';
 import Income from './pages/Income';
+import Reports from './pages/Reports';
+import Settings from './pages/Settings';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -47,6 +49,22 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/reports"
+              element={
+                <ProtectedRoute>
+                  <Reports />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <ProtectedRoute>
+                  <Settings />
+                </ProtectedRoute>
+                }
+              />
             <Route
               path="/income"
               element={

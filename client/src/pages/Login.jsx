@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import '../styles/Auth.css';
 
 const Login = () => {
@@ -45,7 +45,7 @@ const Login = () => {
         </h1>
         <h2 className="auth-subtitle">Welcome Back</h2>
 
-        <form onSubmit={handleSubmit} className="auth-form">
+  <form onSubmit={handleSubmit} className="auth-form" autoComplete="on">
           <div className="form-group">
             <label htmlFor="email" className="form-label">
               Email
@@ -59,6 +59,7 @@ const Login = () => {
               onChange={handleChange}
               required
               placeholder="Enter your email"
+              autoComplete="email"
             />
           </div>
 
@@ -75,6 +76,7 @@ const Login = () => {
               onChange={handleChange}
               required
               placeholder="Enter your password"
+              autoComplete="current-password"
             />
           </div>
 
