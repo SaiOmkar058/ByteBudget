@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
-import StatsCard from '../components/Dashboard/StatsCard';
-import RecentTransactions from '../components/Dashboard/RecentTransactions';
-import ExpenseChart from '../components/Dashboard/ExpenseChart';
+import { StatsCard } from '../components/Dashboard/StatsCard';
+import { RecentTransactions } from '../components/Dashboard/RecentTransactions';
+import { ExpenseChart } from '../components/Dashboard/ExpenseChart';
 import '../styles/Dashboard.css';
 
 const Dashboard = () => {
