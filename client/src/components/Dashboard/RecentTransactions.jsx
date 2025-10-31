@@ -1,7 +1,7 @@
 import React from 'react';
 import { FiArrowUpRight, FiArrowDownRight } from 'react-icons/fi';
 
-const RecentTransactions = ({ transactions = [] }) => {
+export const RecentTransactions = ({ transactions = [] }) => {
   if (transactions.length === 0) {
     return (
       <div className="bg-white rounded-xl p-6 shadow-sm">
@@ -37,4 +37,3 @@ const RecentTransactions = ({ transactions = [] }) => {
   );
 };
 
-export default RecentTransactions;

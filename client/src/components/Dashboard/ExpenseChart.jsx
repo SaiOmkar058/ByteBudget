@@ -23,7 +23,7 @@ ChartJS.register(
   Filler
 );
 
-const ExpenseChart = ({ data }) => {
+export const ExpenseChart = ({ data }) => {
   const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
   const chartData = {
@@ -144,4 +144,3 @@ const ExpenseChart = ({ data }) => {
   );
 };
 
-export default ExpenseChart;

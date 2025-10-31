@@ -1,6 +1,6 @@
 import React from 'react';
 
-const StatsCard = ({ title, value, change }) => {
+export const StatsCard = ({ title, value, change }) => {
   // Format the value with commas as thousand separators
   const formattedValue = new Intl.NumberFormat('en-IN', {
     style: 'currency',
@@ -33,4 +33,3 @@ const StatsCard = ({ title, value, change }) => {
   );
 };
 
-export default StatsCard;
