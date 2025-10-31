@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
 import { useAuth } from '../hooks/useAuth';
 import api from '../services/api';
 import '../styles/Transactions.css';
@@ -30,7 +29,7 @@ const Expenses = () => {
       const res = await api.get('/transactions');
       setExpenses(res.data.filter(txn => txn.type === 'expense'));
     } catch {
-      toast.error('Failed to fetch expenses');
+      console.error('Failed to fetch expenses');
     } finally {
       setLoading(false);
     }
@@ -46,44 +45,44 @@ const Expenses = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!formData.amount || formData.amount <= 0) {
-      toast.error('Please enter a valid amount');
-      return;
-    }
+  e.preventDefault();
+  if (!formData.amount || formData.amount <= 0) {
+    console.error('Please enter a valid amount');
+    return;
+  }
 
-    try {
-      if (editingId) {
-        // Update expense
-        const res = await api.put(`/transactions/${editingId}`, {
-          ...formData,
-          type: 'expense',
-          amount: Number(formData.amount),
-        });
-        setExpenses(expenses.map(exp => exp._id === editingId ? res.data : exp));
-        toast.success('Expense updated successfully!');
-        setEditingId(null);
-      } else {
-        // Add new expense
-        const res = await api.post('/transactions', {
-          ...formData,
-          type: 'expense',
-          amount: Number(formData.amount),
-        });
-        setExpenses([res.data, ...expenses]);
-        toast.success('Expense added successfully!');
-      }
-
-      setFormData({
-        amount: '',
-        category: 'Food',
-        description: '',
-        date: new Date().toISOString().split('T')[0]
+  try {
+    if (editingId) {
+      // Update expense
+      const res = await api.put(`/transactions/${editingId}`, {
+        ...formData,
+        type: 'expense',
+        amount: Number(formData.amount),
       });
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to save expense');
+      setExpenses(expenses.map(exp => exp._id === editingId ? res.data : exp));
+      setEditingId(null);
+    } else {
+      // Add new expense
+      const res = await api.post('/transactions', {
+        ...formData,
+        type: 'expense',
+        amount: Number(formData.amount),
+      });
+      setExpenses([res.data, ...expenses]);
+      console.log('Expense added successfully!');
     }
-  };
+
+    setFormData({
+      amount: '',
+      category: 'Food',
+      description: '',
+      date: new Date().toISOString().split('T')[0]
+    });
+  } catch (err) {
+    console.error(err.response?.data?.message || 'Failed to save expense');
+  }
+};
+
 
   const handleEdit = (expense) => {
     setFormData({
@@ -107,15 +106,15 @@ const Expenses = () => {
   };
 
   const handleDelete = async (id) => {
-    try {
-      await api.delete(`/transactions/${id}`);
-      setExpenses(expenses.filter(exp => exp._id !== id));
-      toast.success('Expense deleted successfully!');
-      setDeleteConfirm(null);
-    } catch {
-      toast.error('Failed to delete expense');
-    }
-  };
+  try {
+    await api.delete(`/transactions/${id}`);
+    setExpenses(expenses.filter(exp => exp._id !== id));
+    setDeleteConfirm(null);
+  } catch {
+    console.error('Failed to delete expense');
+  }
+};
+
 
   const handleLogout = () => {
     logout();

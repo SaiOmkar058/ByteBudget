@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
 import { useAuth } from '../hooks/useAuth';
 import api from '../services/api';
 import '../styles/Transactions.css';
@@ -30,7 +29,7 @@ const Income = () => {
       const res = await api.get('/transactions');
       setIncomes(res.data.filter(txn => txn.type === 'income'));
     } catch {
-      toast.error('Failed to fetch incomes');
+      console.error('Failed to fetch incomes');
     } finally {
       setLoading(false);
     }
@@ -46,44 +45,44 @@ const Income = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!formData.amount || formData.amount <= 0) {
-      toast.error('Please enter a valid amount');
-      return;
-    }
+  e.preventDefault();
+  if (!formData.amount || formData.amount <= 0) {
+    console.error('Please enter a valid amount');  // ✅ Good
+    return;
+  }
 
-    try {
-      if (editingId) {
-        // Update income
-        const res = await api.put(`/transactions/${editingId}`, {
-          ...formData,
-          type: 'income',
-          amount: Number(formData.amount),
-        });
-        setIncomes(incomes.map(inc => inc._id === editingId ? res.data : inc));
-        toast.success('Income updated successfully!');
-        setEditingId(null);
-      } else {
-        // Add new income
-        const res = await api.post('/transactions', {
-          ...formData,
-          type: 'income',
-          amount: Number(formData.amount),
-        });
-        setIncomes([res.data, ...incomes]);
-        toast.success('Income added successfully!');
-      }
-
-      setFormData({
-        amount: '',
-        category: 'Salary',
-        description: '',
-        date: new Date().toISOString().split('T')[0]
+  try {
+    if (editingId) {
+      // Update income
+      const res = await api.put(`/transactions/${editingId}`, {
+        ...formData,
+        type: 'income',
+        amount: Number(formData.amount),
       });
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to save income');
+      setIncomes(incomes.map(inc => inc._id === editingId ? res.data : inc));
+  // ✅ Good
+      setEditingId(null);
+    } else {
+      // Add new income
+      const res = await api.post('/transactions', {
+        ...formData,
+        type: 'income',
+        amount: Number(formData.amount),
+      });
+      setIncomes([res.data, ...incomes]);
     }
-  };
+
+    setFormData({
+      amount: '',
+      category: 'Salary',
+      description: '',
+      date: new Date().toISOString().split('T')[0]
+    });
+  } catch (error) {
+    console.error('Failed to save income:', error.message || 'Please try again');
+  }
+};
+
 
   const handleEdit = (income) => {
     setFormData({
@@ -107,15 +106,15 @@ const Income = () => {
   };
 
   const handleDelete = async (id) => {
-    try {
-      await api.delete(`/transactions/${id}`);
-      setIncomes(incomes.filter(inc => inc._id !== id));
-      toast.success('Income deleted successfully!');
-      setDeleteConfirm(null);
-    } catch {
-      toast.error('Failed to delete income');
-    }
-  };
+  try {
+    await api.delete(`/transactions/${id}`);
+    setIncomes(incomes.filter(inc => inc._id !== id));
+    setDeleteConfirm(null);
+  } catch {
+    console.error('Failed to delete income');
+  }
+};
+
 
   const handleLogout = () => {
     logout();

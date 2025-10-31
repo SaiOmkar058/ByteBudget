@@ -3,18 +3,27 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--gradient-background);
   padding: var(--spacing-md);
 }
 
 .auth-card {
-  background-color: var(--card-bg);
+  background: var(--gradient-card);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
   padding: var(--spacing-2xl);
   border-radius: var(--radius-xl);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-lg);
   width: 100%;
   max-width: 450px;
   animation: slideUp 0.5s ease-out;
+  transition: all var(--transition-normal);
+}
+
+.auth-card:hover {
+  box-shadow: var(--shadow-2xl);
+  transform: translateY(-4px);
 }
 
 @keyframes slideUp {

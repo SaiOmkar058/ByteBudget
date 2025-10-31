@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
 import { useAuth } from '../hooks/useAuth';
 import '../styles/Settings.css';
 
@@ -73,23 +72,21 @@ const Settings = () => {
 
   const handleProfileSubmit = (e) => {
     e.preventDefault();
-    toast.success('Profile updated successfully!');
   };
 
   const handlePasswordSubmit = (e) => {
     e.preventDefault();
     
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast.error('Passwords do not match!');
+      console.error('Failed to update profile');
       return;
     }
 
     if (passwordData.newPassword.length < 6) {
-      toast.error('Password must be at least 6 characters');
+      console.error('Password must be at least 6 characters');
       return;
     }
 
-    toast.success('Password changed successfully!');
     setPasswordData({
       currentPassword: '',
       newPassword: '',
@@ -99,9 +96,6 @@ const Settings = () => {
 
   const handleBudgetSubmit = (e) => {
     e.preventDefault();
-    // Save to localStorage for Dashboard sync
-    localStorage.setItem('monthlyBudget', budgetSettings.monthlyBudget);
-    toast.success('Budget settings updated!');
   };
 
   const handleLogout = () => {

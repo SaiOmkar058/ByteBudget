@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { toast } from 'react-toastify';
 import { useAuth } from '../hooks/useAuth';
 import '../styles/Auth.css';
 
@@ -24,30 +23,24 @@ const Register = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
+  setLoading(true);
 
-    if (formData.password !== formData.confirmPassword) {
-      toast.error('Passwords do not match!');
-      return;
-    }
+  if (formData.password !== formData.confirmPassword) {
+    console.error('Passwords do not match');
+    setLoading(false);
+    return;
+  }
 
-    if (formData.password.length < 6) {
-      toast.error('Password must be at least 6 characters');
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      await register(formData.name, formData.email, formData.password);
-      toast.success('Registration successful!');
-      navigate('/dashboard');
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Registration failed');
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    await register(formData.name, formData.email, formData.password);
+    navigate('/login');
+  } catch (error) {
+    console.error('Registration failed:', error.response?.data?.message || 'Please try again.');
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="auth-container">

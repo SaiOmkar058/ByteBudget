@@ -1,10 +1,10 @@
 .reports-page {
   min-height: 100vh;
-  background-color: var(--bg-color);
+  background: var(--gradient-background);
 }
 
 .reports-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--gradient-primary);
 }
 
 .reports-main {
@@ -27,14 +27,17 @@
 }
 
 .summary-card {
-  background-color: var(--card-bg);
+  background: var(--gradient-card);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
   display: flex;
   align-items: center;
   gap: var(--spacing-md);
   box-shadow: var(--shadow-sm);
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  transition: all var(--transition-normal);
 }
 
 .summary-card:hover {
@@ -85,10 +88,19 @@
 
 /* Chart Card */
 .chart-card {
-  background-color: var(--card-bg);
+  background: var(--gradient-card);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   padding: var(--spacing-xl);
   box-shadow: var(--shadow-sm);
+  transition: all var(--transition-normal);
+}
+
+.chart-card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
 }
 
 .chart-title {
@@ -97,7 +109,7 @@
   color: var(--text-primary);
 }
 
-/* Bar Chart */
+/* Bar Chart - FIXED */
 .bar-chart {
   display: flex;
   align-items: flex-end;
@@ -106,6 +118,7 @@
   padding: var(--spacing-lg) 0;
   border-bottom: 2px solid var(--border-color);
   gap: var(--spacing-md);
+  position: relative;
 }
 
 .bar-group {
@@ -113,23 +126,27 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  height: 100%;
   gap: var(--spacing-sm);
 }
 
 .bars {
   display: flex;
   align-items: flex-end;
-  gap: 4px;
-  height: 100%;
+  gap: 6px;
+  height: calc(100% - 30px); /* Leave space for label */
   width: 100%;
   justify-content: center;
+  position: relative;
 }
 
 .bar {
-  width: 20px;
+  width: 24px;
+  min-height: 5px; /* IMPORTANT: Shows bar even for small values */
   border-radius: var(--radius-sm) var(--radius-sm) 0 0;
   transition: all var(--transition-normal);
   cursor: pointer;
+  position: relative;
 }
 
 .bar:hover {
@@ -146,10 +163,12 @@
 }
 
 .bar-label {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   color: var(--text-secondary);
   margin: 0;
   font-weight: 500;
+  text-align: center;
+  white-space: nowrap;
 }
 
 .chart-legend {
@@ -179,6 +198,18 @@
 
 .expense-color {
   background: linear-gradient(135deg, #ef4444, #f87171);
+}
+
+/* Empty state in charts */
+.empty-state {
+  text-align: center;
+  padding: var(--spacing-2xl);
+  color: var(--text-secondary);
+}
+
+.empty-text {
+  font-size: 1rem;
+  color: var(--text-secondary);
 }
 
 /* Category Chart */
@@ -214,6 +245,21 @@
   color: var(--text-secondary);
 }
 
+/* Progress Bar - ADDED (was missing!) */
+.progress-bar {
+  width: 100%;
+  height: 12px;
+  background-color: #e5e7eb;
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width var(--transition-normal);
+}
+
 .category-percentage {
   font-size: 1.125rem;
   font-weight: 700;
@@ -224,10 +270,19 @@
 
 /* Insights Card */
 .insights-card {
-  background-color: var(--card-bg);
+  background: var(--gradient-card);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   padding: var(--spacing-xl);
   box-shadow: var(--shadow-sm);
+  transition: all var(--transition-normal);
+}
+
+.insights-card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
 }
 
 .insights-title {
@@ -298,10 +353,20 @@
   }
   
   .bar-chart {
-    height: 200px;
+    height: 250px;
+    gap: var(--spacing-sm);
   }
   
   .bar {
-    width: 12px;
+    width: 16px;
+  }
+  
+  .bar-label {
+    font-size: 0.625rem;
+  }
+  
+  .reports-main {
+    padding: var(--spacing-lg) var(--spacing-sm);
   }
 }
+  

@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { toast } from 'react-toastify';
 import { useAuth } from '../hooks/useAuth';
 import '../styles/Auth.css';
 
@@ -27,10 +26,9 @@ const Login = () => {
 
     try {
       await login(formData.email, formData.password);
-      toast.success('Login successful!');
       navigate('/dashboard');
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Login failed');
+      console.error('Login failed:', error.response?.data?.message || 'Please try again.');
     } finally {
       setLoading(false);
     }

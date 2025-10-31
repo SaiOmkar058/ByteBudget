@@ -1,11 +1,11 @@
 // src/App.jsx
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { ToastContainer } from 'react-toastify';
 import { AuthProvider } from './contexts/AuthContext.jsx'; // make sure AuthProvider is exported
 import { useAuth } from './hooks/useAuth';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import Transactions from './pages/Transactions';
 import Expenses from './pages/Expenses';
 import Income from './pages/Income';
 import Reports from './pages/Reports';
@@ -42,6 +42,14 @@ function App() {
               }
             />
             <Route
+              path="/transactions"
+              element={
+                <ProtectedRoute>
+                  <Transactions />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/expenses"
               element={
                 <ProtectedRoute>
@@ -73,23 +81,26 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/income/add"
+              element={
+                <ProtectedRoute>
+                  <Income />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/expenses/add"
+              element={
+                <ProtectedRoute>
+                  <Expenses />
+                </ProtectedRoute>
+              }
+            />
 
             {/* Default Route */}
             <Route path="/" element={<Navigate to="/dashboard" />} />
           </Routes>
-
-          {/* Toast Notifications */}
-          <ToastContainer
-            position="top-right"
-            autoClose={3000}
-            hideProgressBar={false}
-            newestOnTop={false}
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-          />
         </div>
       </Router>
     </AuthProvider>
