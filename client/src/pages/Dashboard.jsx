@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
-import StatsCard from '../components/dashboard/StatsCard';
-import RecentTransactions from '../components/dashboard/RecentTransactions';
-import ExpenseChart from '../components/dashboard/ExpenseChart';
+import { StatsCard } from '../components/dashboard/StatsCard';
+import { RecentTransactions } from '../components/dashboard/RecentTransactions';
+import { ExpenseChart } from '../components/dashboard/ExpenseChart';
 import '../styles/Dashboard.css';
 
 const Dashboard = () => {
@@ -97,8 +97,6 @@ const Dashboard = () => {
     expenses: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
   };
 
-
-
   return (
     <div className="dashboard">
       <div className="dashboard-header">
@@ -117,7 +115,6 @@ const Dashboard = () => {
       </div>
 
       <div className="dashboard-main">
-
         {/* Stats Cards */}
         <div className="stats-grid">
           <StatsCard
