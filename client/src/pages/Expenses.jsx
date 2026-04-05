@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { useAuth } from '../hooks/useAuth';
 import api from '../services/api';
 import '../styles/Transactions.css';
@@ -29,7 +30,7 @@ const Expenses = () => {
       const res = await api.get('/transactions');
       setExpenses(res.data.filter(txn => txn.type === 'expense'));
     } catch {
-      console.error('Failed to fetch expenses');
+      toast.error('Failed to fetch expenses');
     } finally {
       setLoading(false);
     }
@@ -47,7 +48,7 @@ const Expenses = () => {
   const handleSubmit = async (e) => {
   e.preventDefault();
   if (!formData.amount || formData.amount <= 0) {
-    console.error('Please enter a valid amount');
+    toast.error('Please enter a valid amount');
     return;
   }
 
@@ -69,7 +70,7 @@ const Expenses = () => {
         amount: Number(formData.amount),
       });
       setExpenses([res.data, ...expenses]);
-      console.log('Expense added successfully!');
+      toast.success('Expense added successfully!');
     }
 
     setFormData({
@@ -79,7 +80,7 @@ const Expenses = () => {
       date: new Date().toISOString().split('T')[0]
     });
   } catch (err) {
-    console.error(err.response?.data?.message || 'Failed to save expense');
+    toast.error(err.response?.data?.message || 'Failed to save expense');
   }
 };
 
@@ -111,7 +112,7 @@ const Expenses = () => {
     setExpenses(expenses.filter(exp => exp._id !== id));
     setDeleteConfirm(null);
   } catch {
-    console.error('Failed to delete expense');
+    toast.error('Failed to delete expense');
   }
 };
 
@@ -176,10 +177,10 @@ const Expenses = () => {
             <p className="page-subtitle">Track Your Expenses 📉</p>
           </div>
           <div className="header-actions">
-            <button onClick={() => navigate('/dashboard')} className="btn btn-secondary">
+            <button id="nav-dashboard" name="nav-dashboard" onClick={() => navigate('/dashboard')} className="btn btn-secondary">
               ← Dashboard
             </button>
-            <button onClick={handleLogout} className="btn btn-outline">
+            <button id="nav-logout" name="nav-logout" onClick={handleLogout} className="btn btn-outline">
               Logout
             </button>
           </div>
@@ -263,7 +264,7 @@ const Expenses = () => {
               </div>
 
               <div className="form-buttons">
-                <button type="submit" className="btn btn-primary btn-full">
+                <button id="submit-expense" name="submit-expense" type="submit" className="btn btn-primary btn-full">
                   {editingId ? 'Update Expense' : 'Add Expense'}
                 </button>
                 {editingId && (

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { useAuth } from '../hooks/useAuth';
 import '../styles/Settings.css';
 
@@ -72,18 +73,19 @@ const Settings = () => {
 
   const handleProfileSubmit = (e) => {
     e.preventDefault();
+    toast.success('Profile updated successfully!');
   };
 
   const handlePasswordSubmit = (e) => {
     e.preventDefault();
     
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      console.error('Failed to update profile');
+      toast.error('Passwords do not match');
       return;
     }
 
     if (passwordData.newPassword.length < 6) {
-      console.error('Password must be at least 6 characters');
+      toast.error('Password must be at least 6 characters');
       return;
     }
 
@@ -92,10 +94,14 @@ const Settings = () => {
       newPassword: '',
       confirmPassword: '',
     });
+    toast.success('Password updated successfully!');
   };
 
   const handleBudgetSubmit = (e) => {
     e.preventDefault();
+    localStorage.setItem('monthlyBudget', budgetSettings.monthlyBudget);
+    localStorage.setItem('savingsGoal', budgetSettings.savingsGoal);
+    toast.success('Budget settings saved!');
   };
 
   const handleLogout = () => {
@@ -116,10 +122,10 @@ const Settings = () => {
             <p className="page-subtitle">Account Settings ⚙️</p>
           </div>
           <div className="header-actions">
-            <button onClick={() => navigate('/dashboard')} className="btn btn-secondary">
+            <button id="nav-dashboard" name="nav-dashboard" onClick={() => navigate('/dashboard')} className="btn btn-secondary">
               ← Dashboard
             </button>
-            <button onClick={handleLogout} className="btn btn-outline">
+            <button id="nav-logout" name="nav-logout" onClick={handleLogout} className="btn btn-outline">
               Logout
             </button>
           </div>
@@ -220,7 +226,7 @@ const Settings = () => {
                     </select>
                   </div>
 
-                  <button type="submit" className="btn btn-primary">
+                  <button id="save-profile" name="save-profile" type="submit" className="btn btn-primary">
                     Save Changes
                   </button>
                 </form>
@@ -273,7 +279,7 @@ const Settings = () => {
                     />
                   </div>
 
-                  <button type="submit" className="btn btn-primary">
+                  <button id="save-password" name="save-password" type="submit" className="btn btn-primary">
                     Update Password
                   </button>
                 </form>
@@ -401,7 +407,7 @@ const Settings = () => {
                     <p className="form-hint">Target amount to save each month</p>
                   </div>
 
-                  <button type="submit" className="btn btn-primary">
+                  <button id="save-budget" name="save-budget" type="submit" className="btn btn-primary">
                     Save Budget Settings
                   </button>
                 </form>

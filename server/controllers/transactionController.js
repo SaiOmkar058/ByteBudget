@@ -1,4 +1,3 @@
-// ...existing code...
 const Transaction = require('../models/Transaction.js');
 
 // @desc    Get all transactions

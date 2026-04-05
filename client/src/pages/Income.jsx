@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { useAuth } from '../hooks/useAuth';
 import api from '../services/api';
 import '../styles/Transactions.css';
@@ -29,7 +30,7 @@ const Income = () => {
       const res = await api.get('/transactions');
       setIncomes(res.data.filter(txn => txn.type === 'income'));
     } catch {
-      console.error('Failed to fetch incomes');
+      toast.error('Failed to fetch incomes');
     } finally {
       setLoading(false);
     }
@@ -47,7 +48,7 @@ const Income = () => {
   const handleSubmit = async (e) => {
   e.preventDefault();
   if (!formData.amount || formData.amount <= 0) {
-    console.error('Please enter a valid amount');  // ✅ Good
+    toast.error('Please enter a valid amount');
     return;
   }
 
@@ -60,7 +61,7 @@ const Income = () => {
         amount: Number(formData.amount),
       });
       setIncomes(incomes.map(inc => inc._id === editingId ? res.data : inc));
-  // ✅ Good
+      toast.success('Income updated successfully!');
       setEditingId(null);
     } else {
       // Add new income
@@ -79,7 +80,7 @@ const Income = () => {
       date: new Date().toISOString().split('T')[0]
     });
   } catch (error) {
-    console.error('Failed to save income:', error.message || 'Please try again');
+    toast.error(error.message || 'Failed to save income');
   }
 };
 
@@ -111,7 +112,7 @@ const Income = () => {
     setIncomes(incomes.filter(inc => inc._id !== id));
     setDeleteConfirm(null);
   } catch {
-    console.error('Failed to delete income');
+    toast.error('Failed to delete income');
   }
 };
 
@@ -175,10 +176,10 @@ const Income = () => {
             <p className="page-subtitle">Track Your Income 📈</p>
           </div>
           <div className="header-actions">
-            <button onClick={() => navigate('/dashboard')} className="btn btn-secondary">
+            <button id="nav-dashboard" name="nav-dashboard" onClick={() => navigate('/dashboard')} className="btn btn-secondary">
               ← Dashboard
             </button>
-            <button onClick={handleLogout} className="btn btn-outline">
+            <button id="nav-logout" name="nav-logout" onClick={handleLogout} className="btn btn-outline">
               Logout
             </button>
           </div>
@@ -262,7 +263,7 @@ const Income = () => {
               </div>
 
               <div className="form-buttons">
-                <button type="submit" className="btn btn-primary btn-full">
+                <button id="submit-income" name="submit-income" type="submit" className="btn btn-primary btn-full">
                   {editingId ? 'Update Income' : 'Add Income'}
                 </button>
                 {editingId && (

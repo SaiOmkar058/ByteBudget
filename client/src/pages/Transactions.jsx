@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import api from '../services/api';
 import Sidebar from '../components/Sidebar';
 import TopBar from '../components/TopBar';
@@ -34,7 +35,7 @@ const Transactions = () => {
       setTransactions(txns);
       setLoading(false);
     } catch (error) {
-      console.error('Error fetching transactions:', error);
+      toast.error('Error fetching transactions');
       setLoading(false);
     }
   };
@@ -97,7 +98,7 @@ const Transactions = () => {
         setTransactions(transactions.filter(txn => txn._id !== id));
       } catch (error) {
         console.error('Error deleting transaction:', error);
-        alert('Failed to delete transaction');
+        toast.error('Failed to delete transaction');
       }
     }
   };

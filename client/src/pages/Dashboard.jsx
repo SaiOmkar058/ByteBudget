@@ -15,7 +15,7 @@ const Dashboard = () => {
     totalIncome: 0,
     totalExpenses: 0,
     balance: 0,
-    monthlyBudget: Number(localStorage.getItem('monthlyBudget')) || 0
+    monthlyBudget: Number(localStorage.getItem('monthlyBudget')) || 35000
   });
   const [_recentTransactions, setRecentTransactions] = useState([]);
   const [spendingByCategory, setSpendingByCategory] = useState([]);
@@ -38,7 +38,7 @@ const Dashboard = () => {
           totalIncome,
           totalExpenses,
           balance,
-          monthlyBudget: Number(localStorage.getItem('monthlyBudget')) || 0
+          monthlyBudget: Number(localStorage.getItem('monthlyBudget')) || 35000
         });
 
         // Calculate spending by category
@@ -121,25 +121,21 @@ const Dashboard = () => {
             type="income"
             title="Total Income"
             value={stats.totalIncome}
-            change={12.5}
           />
           <StatsCard
             type="expense"
             title="Total Expenses"
             value={stats.totalExpenses}
-            change={-5.2}
           />
           <StatsCard
             type="balance"
             title="Current Balance"
             value={stats.balance}
-            change={0}
           />
           <StatsCard
             type="budget"
             title="Monthly Budget"
             value={stats.monthlyBudget}
-            change={0}
           />
         </div>
 
@@ -182,16 +178,11 @@ const Dashboard = () => {
         </div>
 
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <div className="dashboard-content-grid">
           {/* Chart Section */}
-          <div className="lg:col-span-2 spending-overview">
-            <div className="flex justify-between items-center mb-6">
+          <div className="spending-overview">
+            <div className="section-header">
               <h2 className="section-title">Expense Overview</h2>
-              <select className="text-sm border border-gray-200 rounded px-2 py-1">
-                <option>This Month</option>
-                <option>Last Month</option>
-                <option>Last 6 Months</option>
-              </select>
             </div>
             <ExpenseChart data={chartData} />
           </div>
@@ -216,15 +207,7 @@ const Dashboard = () => {
           {spendingByCategory && spendingByCategory.length > 0 ? (
             <div className="spending-bars">
               {spendingByCategory.map((item, idx) => {
-                const colors = [
-                  'bg-blue-500',
-                  'bg-purple-500',
-                  'bg-yellow-500',
-                  'bg-red-500',
-                  'bg-green-500',
-                  'bg-pink-500'
-                ];
-                const color = colors[idx % colors.length];
+                const dotColors = ['#3b82f6','#8b5cf6','#f59e0b','#ef4444','#10b981','#ec4899'];
                 const percentage = stats.totalExpenses > 0
                   ? (item.amount / stats.totalExpenses) * 100
                   : 0;
@@ -232,8 +215,8 @@ const Dashboard = () => {
                 return (
                   <div key={item.category} className="spending-bar">
                     <div className="spending-label">
-                      <div className="flex items-center">
-                        <span className={`w-3 h-3 rounded-full ${color} mr-3`}></span>
+                      <div className="spending-label-left">
+                        <span className="category-dot" style={{ background: dotColors[idx % dotColors.length] }}></span>
                         <span>{item.category}</span>
                       </div>
                       <span className="spending-amount">₹{Number(item.amount).toLocaleString()}</span>
@@ -249,12 +232,13 @@ const Dashboard = () => {
               })}
             </div>
           ) : (
-            <div className="text-center py-8">
-              <div className="text-4xl mb-2">📭</div>
-              <p className="text-gray-500">No spending data yet</p>
+            <div className="empty-state">
+              <div className="empty-icon">📭</div>
+              <p className="empty-text">No spending data yet</p>
               <button
                 onClick={() => navigate('/expenses/add')}
-                className="mt-4 text-indigo-600 hover:text-indigo-700 text-sm font-medium"
+                className="btn btn-primary"
+                style={{ marginTop: '1rem' }}
               >
                 Add your first transaction
               </button>

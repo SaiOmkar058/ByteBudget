@@ -1,7 +1,7 @@
-// src/App.jsx
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext.jsx'; // make sure AuthProvider is exported
 import { useAuth } from './hooks/useAuth';
+import Landing from './pages/landing';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
@@ -29,6 +29,7 @@ function App() {
         <div className="App">
           <Routes>
             {/* Public Routes */}
+            <Route path="/" element={<Landing />}/>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
 
@@ -98,8 +99,8 @@ function App() {
               }
             />
 
-            {/* Default Route */}
-            <Route path="/" element={<Navigate to="/dashboard" />} />
+            {/* Catch-all: redirect unknown routes to landing */}
+            <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </div>
       </Router>
