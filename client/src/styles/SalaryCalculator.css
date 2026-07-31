@@ -1,0 +1,373 @@
+/* ═══════════════════════════════════════════════════════════
+   Salary Calculator — Premium glassmorphic styles
+═══════════════════════════════════════════════════════════ */
+
+.salary-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+/* Header */
+.salary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--border-color);
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.salary-page-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 0.25rem 0;
+}
+
+.salary-page-sub {
+  color: var(--text-secondary);
+  font-size: 0.9375rem;
+  margin: 0;
+}
+
+.salary-fy-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.375rem 0.875rem;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, rgba(13, 148, 136, 0.15) 0%, rgba(20, 184, 166, 0.1) 100%);
+  color: var(--primary-color);
+  border: 1px solid rgba(13, 148, 136, 0.25);
+  white-space: nowrap;
+  align-self: flex-start;
+  margin-top: 0.2rem;
+}
+
+/* Card base */
+.salary-card {
+  background: var(--gradient-card);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-xl);
+  box-shadow: var(--shadow-lg);
+}
+
+.salary-card-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-lg) 0;
+}
+
+/* Form */
+.salary-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-xl);
+  margin-bottom: var(--spacing-xl);
+}
+
+.salary-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.salary-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.salary-input-wrap {
+  display: flex;
+  align-items: center;
+  background: var(--bg-color);
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.salary-input-wrap:focus-within {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.12);
+}
+
+.salary-input-prefix {
+  padding: 0 var(--spacing-sm) 0 var(--spacing-md);
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 1rem;
+  user-select: none;
+}
+
+.salary-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: var(--spacing-sm) var(--spacing-md) var(--spacing-sm) 0;
+  font-size: 1rem;
+  color: var(--text-primary);
+  font-family: var(--font-family);
+}
+
+.salary-hint {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.salary-calc-btn {
+  padding: var(--spacing-md) var(--spacing-2xl);
+  background: var(--gradient-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-lg);
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
+}
+
+.salary-calc-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(13, 148, 136, 0.4);
+}
+
+/* Regime comparison grid */
+.salary-results-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-xl);
+}
+
+.salary-regime-card {
+  background: var(--gradient-card);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-xl);
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  transition: all var(--transition-normal);
+}
+
+.salary-regime-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-2xl);
+}
+
+.regime-recommended {
+  border-color: var(--primary-color);
+  box-shadow: var(--shadow-lg), 0 0 20px rgba(13, 148, 136, 0.2);
+}
+
+.regime-badge {
+  position: absolute;
+  top: -0.6rem;
+  right: 1.25rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  padding: 0.2rem 0.75rem;
+  border-radius: var(--radius-full);
+  background: var(--gradient-primary);
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  box-shadow: 0 2px 8px rgba(13, 148, 136, 0.3);
+}
+
+.regime-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-lg) 0;
+}
+
+.regime-stats {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
+}
+
+.regime-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-xs) 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.regime-stat:last-child { border-bottom: none; }
+
+.regime-stat-label {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.regime-stat-value {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.regime-stat-value.deduction { color: #10b981; }
+.regime-stat-value.danger    { color: #ef4444; }
+
+.regime-takehome-box {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-sm);
+  background: linear-gradient(135deg, rgba(13,148,136,0.08) 0%, rgba(20,184,166,0.05) 100%);
+  border: 1px solid rgba(13,148,136,0.18);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.regime-takehome-label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin: 0 0 0.3rem 0;
+  font-weight: 500;
+}
+
+.regime-takehome {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin: 0;
+}
+
+.regime-takehome-monthly {
+  font-size: 1.375rem;
+  font-weight: 800;
+  color: var(--primary-color);
+  margin: 0;
+}
+
+.regime-save-btn {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: transparent;
+  border: 1.5px solid var(--primary-color);
+  border-radius: var(--radius-lg);
+  color: var(--primary-color);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+}
+
+.regime-save-btn:hover:not(:disabled) {
+  background: var(--primary-color);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.regime-save-btn.saved {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: #10b981;
+  color: #10b981;
+  cursor: default;
+}
+
+.regime-save-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Summary Card */
+.salary-summary-card {
+  background: linear-gradient(135deg, rgba(13,148,136,0.06) 0%, rgba(20,184,166,0.04) 100%);
+}
+
+.salary-summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-sm) 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.salary-summary-row:last-child { border-bottom: none; }
+
+.salary-summary-label {
+  color: var(--text-secondary);
+  font-size: 0.9375rem;
+}
+
+.salary-savings-amt {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.salary-savings-amt.positive { color: #10b981; }
+.salary-savings-amt.negative { color: #ef4444; }
+
+/* Slab Tables */
+.slab-tables {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-xl);
+}
+
+.slab-table-title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-sm) 0;
+}
+
+.slab-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.slab-table th,
+.slab-table td {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.slab-table th {
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.slab-table td {
+  color: var(--text-primary);
+}
+
+.slab-cess-row td {
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .salary-form-grid,
+  .salary-results-grid,
+  .slab-tables {
+    grid-template-columns: 1fr;
+  }
+  .regime-takehome-box {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,15 +1,63 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from '../hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import api from '../services/api';
-import Sidebar from '../components/Sidebar';
-import TopBar from '../components/TopBar';
+import { FiEdit2, FiTrash2, FiArrowUp, FiArrowDown, FiPlus, FiSearch, FiTrendingUp, FiTrendingDown, FiInfo, FiChevronDown } from 'react-icons/fi';
 import '../styles/Transactions.css';
 
+const CustomDropdown = ({ value, onChange, options, labelPrefix }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const selectedOption = options.find(opt => opt.value === value);
+
+  return (
+    <div className="custom-dropdown" ref={dropdownRef}>
+      <button
+        type="button"
+        className={`dropdown-trigger ${isOpen ? 'active' : ''}`}
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <span className="dropdown-trigger-text">
+          {labelPrefix ? `${labelPrefix}: ` : ''}{selectedOption ? selectedOption.label : value}
+        </span>
+        <FiChevronDown className={`dropdown-chevron-icon ${isOpen ? 'open' : ''}`} />
+      </button>
+
+      {isOpen && (
+        <ul className="dropdown-options">
+          {options.map((opt) => (
+            <li
+              key={opt.value}
+              className={`dropdown-option ${value === opt.value ? 'selected' : ''}`}
+              onClick={() => {
+                onChange(opt.value);
+                setIsOpen(false);
+              }}
+            >
+              {opt.label}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+};
+
+
 const Transactions = () => {
-  const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [transactions, setTransactions] = useState([]);
   const [filteredTransactions, setFilteredTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -21,6 +69,13 @@ const Transactions = () => {
   useEffect(() => {
     fetchTransactions();
   }, []);
+
+  // Sync with URL search query param (e.g. from topbar search bar)
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const query = params.get('search') || '';
+    setSearchTerm(query);
+  }, [location.search]);
 
   useEffect(() => {
     filterAndSortTransactions();
@@ -86,10 +141,7 @@ const Transactions = () => {
     setFilteredTransactions(filtered);
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
+
 
   const handleDeleteTransaction = async (id) => {
     if (window.confirm('Are you sure you want to delete this transaction?')) {
@@ -112,155 +164,187 @@ const Transactions = () => {
   };
 
   if (loading) {
-    return (
-      <div className="transactions-page">
-        <Sidebar />
-        <div className="main-content">
-          <TopBar onLogout={handleLogout} />
-          <div className="loading">Loading transactions...</div>
-        </div>
-      </div>
-    );
+    return <div className="loading">Loading transactions...</div>;
   }
 
+  const totalIncome = filteredTransactions
+    .filter(t => t.type === 'income')
+    .reduce((sum, t) => sum + Number(t.amount), 0);
+
+  const totalExpense = filteredTransactions
+    .filter(t => t.type === 'expense')
+    .reduce((sum, t) => sum + Number(t.amount), 0);
+
+  const netBalance = totalIncome - totalExpense;
+
   return (
-    <div className="transactions-page">
-      <Sidebar />
-      <div className="main-content">
-        <TopBar onLogout={handleLogout} />
+    <div className="transactions-container">
+      <div className="transactions-header">
+        <div className="header-info">
+          <h2>Overview</h2>
+          <p className="subtitle">Track and filter all your cash flows in one place</p>
+        </div>
+        <div className="header-actions">
+          <button
+            className="btn-add income-btn"
+            onClick={() => navigate('/income/add')}
+          >
+            <FiPlus style={{ marginRight: '0.5rem' }} /> Add Income
+          </button>
+          <button
+            className="btn-add expense-btn"
+            onClick={() => navigate('/expenses/add')}
+          >
+            <FiPlus style={{ marginRight: '0.5rem' }} /> Add Expense
+          </button>
+        </div>
+      </div>
 
-        <div className="transactions-container">
-          <div className="transactions-header">
-            <h1>All Transactions</h1>
-            <div className="header-actions">
-              <button
-                className="btn-primary"
-                onClick={() => navigate('/income/add')}
-              >
-                + Add Income
-              </button>
-              <button
-                className="btn-secondary"
-                onClick={() => navigate('/expenses/add')}
-              >
-                + Add Expense
-              </button>
-            </div>
-          </div>
-
-          {/* Filters and Search */}
-          <div className="filters-section">
-            <div className="search-bar">
-              <input
-                type="text"
-                placeholder="Search transactions..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="search-input"
-              />
-            </div>
-
-            <div className="filter-controls">
-              <select
-                value={filter}
-                onChange={(e) => setFilter(e.target.value)}
-                className="filter-select"
-              >
-                <option value="all">All Transactions</option>
-                <option value="income">Income Only</option>
-                <option value="expense">Expenses Only</option>
-              </select>
-
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="filter-select"
-              >
-                <option value="date">Sort by Date</option>
-                <option value="amount">Sort by Amount</option>
-                <option value="category">Sort by Category</option>
-              </select>
-
-              <button
-                onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-                className="sort-btn"
-              >
-                {sortOrder === 'asc' ? '↑' : '↓'}
-              </button>
-            </div>
-          </div>
-
-          {/* Transactions List */}
-          <div className="transactions-list">
-            {filteredTransactions.length === 0 ? (
-              <div className="empty-state">
-                <div className="empty-icon">📄</div>
-                <h3>No transactions found</h3>
-                <p>
-                  {searchTerm || filter !== 'all'
-                    ? 'Try adjusting your filters or search terms.'
-                    : 'Start by adding your first transaction.'
-                  }
-                </p>
-                {!searchTerm && filter === 'all' && (
-                  <div className="empty-actions">
-                    <button
-                      className="btn-primary"
-                      onClick={() => navigate('/income/add')}
-                    >
-                      Add Income
-                    </button>
-                    <button
-                      className="btn-secondary"
-                      onClick={() => navigate('/expenses/add')}
-                    >
-                      Add Expense
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              filteredTransactions.map((transaction) => (
-                <div key={transaction._id} className="transaction-card">
-                  <div className="transaction-icon">
-                    {transaction.type === 'income' ? '💰' : '💸'}
-                  </div>
-
-                  <div className="transaction-details">
-                    <div className="transaction-description">
-                      {transaction.description}
-                    </div>
-                    <div className="transaction-meta">
-                      <span className="transaction-category">{transaction.category}</span>
-                      <span className="transaction-date">{formatDate(transaction.date)}</span>
-                    </div>
-                  </div>
-
-                  <div className="transaction-amount">
-                    <span className={`amount ${transaction.type}`}>
-                      {transaction.type === 'income' ? '+' : '-'}₹{Number(transaction.amount).toLocaleString()}
-                    </span>
-                  </div>
-
-                  <div className="transaction-actions">
-                    <button
-                      className="edit-btn"
-                      onClick={() => navigate(`/${transaction.type}s/edit/${transaction._id}`)}
-                    >
-                      ✏️
-                    </button>
-                    <button
-                      className="delete-btn"
-                      onClick={() => handleDeleteTransaction(transaction._id)}
-                    >
-                      🗑️
-                    </button>
-                  </div>
-                </div>
-              ))
-            )}
+      {/* Real-time summary cards */}
+      <div className="transactions-summary-cards">
+        <div className="summary-card income">
+          <div className="card-icon"><FiTrendingUp /></div>
+          <div className="card-info">
+            <span className="summary-label">Filtered Income</span>
+            <span className="summary-value">₹{totalIncome.toLocaleString('en-IN')}</span>
           </div>
         </div>
+        <div className="summary-card expense">
+          <div className="card-icon"><FiTrendingDown /></div>
+          <div className="card-info">
+            <span className="summary-label">Filtered Expense</span>
+            <span className="summary-value">₹{totalExpense.toLocaleString('en-IN')}</span>
+          </div>
+        </div>
+        <div className="summary-card balance">
+          <div className="card-icon"><FiInfo /></div>
+          <div className="card-info">
+            <span className="summary-label">Net Balance</span>
+            <span className={`summary-value ${netBalance >= 0 ? 'positive' : 'negative'}`}>
+              {netBalance >= 0 ? '+' : '-'}₹{Math.abs(netBalance).toLocaleString('en-IN')}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Filters and Search */}
+      <div className="filters-section">
+        <div className="search-bar">
+          <FiSearch className="search-bar-icon" />
+          <input
+            type="text"
+            placeholder="Search transactions..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="search-input"
+          />
+        </div>
+
+        <div className="filter-controls">
+          <CustomDropdown
+            value={filter}
+            onChange={setFilter}
+            options={[
+              { value: 'all', label: 'All Flow' },
+              { value: 'income', label: 'Income Only' },
+              { value: 'expense', label: 'Expenses Only' }
+            ]}
+          />
+
+          <CustomDropdown
+            value={sortBy}
+            onChange={setSortBy}
+            options={[
+              { value: 'date', label: 'Sort by Date' },
+              { value: 'amount', label: 'Sort by Amount' },
+              { value: 'category', label: 'Sort by Category' }
+            ]}
+          />
+
+          <button
+            onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+            className="sort-btn"
+            title={`Sort ${sortOrder === 'asc' ? 'Descending' : 'Ascending'}`}
+          >
+            {sortOrder === 'asc' ? <FiArrowUp /> : <FiArrowDown />}
+          </button>
+        </div>
+      </div>
+
+      {/* Transactions List */}
+      <div className="transactions-list">
+        {filteredTransactions.length === 0 ? (
+          <div className="empty-state">
+            <div className="empty-icon">📄</div>
+            <h3>No transactions found</h3>
+            <p>
+              {searchTerm || filter !== 'all'
+                ? 'Try adjusting your filters or search terms.'
+                : 'Start by adding your first transaction.'
+              }
+            </p>
+            {!searchTerm && filter === 'all' && (
+              <div className="empty-actions">
+                <button
+                  className="btn-add income-btn"
+                  onClick={() => navigate('/income/add')}
+                >
+                  <FiPlus style={{ marginRight: '0.5rem' }} /> Add Income
+                </button>
+                <button
+                  className="btn-add expense-btn"
+                  onClick={() => navigate('/expenses/add')}
+                >
+                  <FiPlus style={{ marginRight: '0.5rem' }} /> Add Expense
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          filteredTransactions.map((transaction) => (
+            <div key={transaction._id} className={`transaction-card ${transaction.type}`}>
+              <div className="transaction-left-section">
+                <div className="transaction-icon">
+                  {transaction.type === 'income' ? <FiTrendingUp /> : <FiTrendingDown />}
+                </div>
+                <div className="transaction-details">
+                  <div className="transaction-description">
+                    {transaction.description}
+                  </div>
+                  <span className={`category-badge ${transaction.type}`}>
+                    {transaction.category}
+                  </span>
+                </div>
+              </div>
+
+              <div className="transaction-middle-section">
+                <span className="transaction-date">{formatDate(transaction.date)}</span>
+              </div>
+
+              <div className="transaction-right-section">
+                <span className={`transaction-amount ${transaction.type}`}>
+                  {transaction.type === 'income' ? '+' : '-'}₹{Number(transaction.amount).toLocaleString('en-IN')}
+                </span>
+                <div className="transaction-actions">
+                  <button
+                    className="action-btn edit-btn"
+                    onClick={() => navigate(`/${transaction.type}s/edit/${transaction._id}`)}
+                    title="Edit Transaction"
+                  >
+                    <FiEdit2 size={16} />
+                  </button>
+                  <button
+                    className="action-btn delete-btn"
+                    onClick={() => handleDeleteTransaction(transaction._id)}
+                    title="Delete Transaction"
+                  >
+                    <FiTrash2 size={16} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );

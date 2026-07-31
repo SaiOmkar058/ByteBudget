@@ -1,11 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
 import api from '../services/api';
 import '../styles/Reports.css';
 
 const Reports = () => {
-  const { logout } = useAuth();
   const navigate = useNavigate();
 
   const [stats, setStats] = useState({
@@ -76,11 +74,6 @@ const Reports = () => {
     fetchReportData();
   }, []);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
-
   const getCategoryColor = (category) => {
     const colors = {
       Food: '#10b981',
@@ -95,26 +88,6 @@ const Reports = () => {
 
   return (
     <div className="reports-page">
-      {/* Header */}
-      <header className="page-header reports-header">
-        <div className="header-content">
-          <div>
-            <h1 className="page-title">
-              <span className="emoji">💰</span>
-              <span className="gradient-text">ByteBudget</span>
-            </h1>
-            <p className="page-subtitle">Financial Reports & Analytics 📊</p>
-          </div>
-          <div className="header-actions">
-            <button onClick={() => navigate('/dashboard')} className="btn btn-secondary">
-              ← Dashboard
-            </button>
-            <button onClick={handleLogout} className="btn btn-outline">
-              Logout
-            </button>
-          </div>
-        </div>
-      </header>
 
       <main className="reports-main">
         <div className="reports-container">

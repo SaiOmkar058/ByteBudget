@@ -16,6 +16,9 @@ const Layout = () => {
       }
     };
 
+    // Initial check
+    handleResize();
+
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -26,17 +29,13 @@ const Layout = () => {
 
   return (
     <div className="app-layout">
-      <Sidebar isOpen={isSidebarOpen} />
-      <div 
-        className={`main-content transition-all duration-300 ease-in-out ${
-          isSidebarOpen ? 'lg:ml-[250px]' : 'lg:ml-0'
-        }`}
-      >
+      <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+      <div className={`main-content ${isSidebarOpen ? '' : 'sidebar-collapsed'}`}>
         <TopBar 
           toggleSidebar={toggleSidebar} 
           isSidebarOpen={isSidebarOpen} 
         />
-        <div className="container mx-auto">
+        <div className="container">
           <Outlet />
         </div>
       </div>
@@ -45,3 +44,4 @@ const Layout = () => {
 };
 
 export default Layout;
+

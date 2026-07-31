@@ -5,7 +5,7 @@ import { useAuth } from '../hooks/useAuth';
 import '../styles/Settings.css';
 
 const Settings = () => {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState('profile');
@@ -104,33 +104,8 @@ const Settings = () => {
     toast.success('Budget settings saved!');
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
-
   return (
     <div className="settings-page">
-      {/* Header */}
-      <header className="page-header settings-header">
-        <div className="header-content">
-          <div>
-            <h1 className="page-title">
-              <span className="emoji">💰</span>
-              <span className="gradient-text">ByteBudget</span>
-            </h1>
-            <p className="page-subtitle">Account Settings ⚙️</p>
-          </div>
-          <div className="header-actions">
-            <button id="nav-dashboard" name="nav-dashboard" onClick={() => navigate('/dashboard')} className="btn btn-secondary">
-              ← Dashboard
-            </button>
-            <button id="nav-logout" name="nav-logout" onClick={handleLogout} className="btn btn-outline">
-              Logout
-            </button>
-          </div>
-        </div>
-      </header>
 
       <main className="settings-main">
         <div className="settings-container">
@@ -199,17 +174,6 @@ const Settings = () => {
                     <p className="form-hint">Email cannot be changed</p>
                   </div>
 
-                  <div className="form-group">
-                    <label className="form-label">Phone Number</label>
-                    <input
-                      type="tel"
-                      name="phone"
-                      className="form-input"
-                      value={profileData.phone}
-                      onChange={handleProfileChange}
-                      placeholder="+91 1234567890"
-                    />
-                  </div>
 
                   <div className="form-group">
                     <label className="form-label">Preferred Currency</label>

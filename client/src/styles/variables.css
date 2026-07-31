@@ -23,8 +23,8 @@
   --text-secondary: #64748b;      /* Slate 500 */
   --text-muted: #94a3b8;          /* Slate 400 */
 
-  --border-color: rgba(148, 163, 184, 0.2); /* Semi-transparent slate */
-  --border-light: rgba(148, 163, 184, 0.3);
+  --border-color: rgba(148, 163, 184, 0.35); /* Increased contrast for light mode */
+  --border-light: rgba(148, 163, 184, 0.5);
 
   /* Gradients */
   --gradient-primary: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
@@ -54,14 +54,14 @@
 
   /* Shadows */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.15);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
-  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.2);
 
   /* Glassmorphism */
-  --glass-bg: rgba(255, 255, 255, 0.1);
-  --glass-border: rgba(255, 255, 255, 0.2);
+  --glass-bg: rgba(255, 255, 255, 0.3);
+  --glass-border: rgba(148, 163, 184, 0.28); /* Glass elements borders defined clearly in light mode */
   --glass-blur: blur(20px);
 
   /* Glow Effects */
@@ -82,3 +82,31 @@
   /* Font */
   --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
 }
+
+[data-theme='dark'] {
+  /* Colors */
+  --bg-color: #0f172a;            /* Slate 900 */
+  --bg-secondary: #1e293b;        /* Slate 800 */
+  --bg-tertiary: #334155;         /* Slate 700 */
+
+  --card-bg: rgba(30, 41, 59, 0.7); /* Translucent slate */
+  --card-hover: rgba(30, 41, 59, 0.9);
+
+  --text-primary: #f8fafc;        /* Slate 50 */
+  --text-secondary: #cbd5e1;      /* Slate 300 */
+  --text-muted: #64748b;          /* Slate 500 */
+
+  --border-color: rgba(255, 255, 255, 0.1);
+  --border-light: rgba(255, 255, 255, 0.2);
+
+  /* Gradients */
+  --gradient-background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  --gradient-secondary: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  --gradient-card: linear-gradient(145deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.5) 100%);
+  --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+
+  /* Glassmorphism */
+  --glass-bg: rgba(15, 23, 42, 0.3);
+  --glass-border: rgba(255, 255, 255, 0.1);
+}
+

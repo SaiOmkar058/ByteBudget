@@ -27,6 +27,11 @@ const transactionSchema = new mongoose.Schema(
       trim: true,
       default: '',
     },
+    budgetCategory: {
+      type: String,
+      enum: ['Need', 'Want', 'Savings/Investment', ''],
+      default: '',
+    },
     date: {
       type: Date,
       required: [true, 'Please add a date'],

@@ -63,7 +63,16 @@ const Login = () => {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="auth-form" autoComplete="on">
+      <form 
+        onSubmit={handleSubmit} 
+        className="auth-form" 
+        autoComplete="on"
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            handleSubmit(e);
+          }
+        }}
+      >
         <div className="form-group">
           <label htmlFor="email" className="form-label">
             Email Address
@@ -98,7 +107,7 @@ const Login = () => {
           />
         </div>
 
-        <button id="submit-login" name="submit-login" type="submit" className="btn-primary" disabled={loading}>
+        <button id="submit-login" name="submit-login" type="submit" className="btn btn-primary btn-block" disabled={loading}>
           {loading ? 'Signing in...' : 'Sign in'}
         </button>
       </form>

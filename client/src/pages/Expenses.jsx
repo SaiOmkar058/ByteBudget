@@ -1,19 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { useAuth } from '../hooks/useAuth';
 import api from '../services/api';
 import '../styles/Transactions.css';
 
 const Expenses = () => {
-  const { logout } = useAuth();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     amount: '',
     category: 'Food',
     description: '',
-    date: new Date().toISOString().split('T')[0]
+    date: new Date().toISOString().split('T')[0],
+    budgetCategory: ''
   });
 
   const [expenses, setExpenses] = useState([]);
@@ -77,7 +76,8 @@ const Expenses = () => {
       amount: '',
       category: 'Food',
       description: '',
-      date: new Date().toISOString().split('T')[0]
+      date: new Date().toISOString().split('T')[0],
+      budgetCategory: ''
     });
   } catch (err) {
     toast.error(err.response?.data?.message || 'Failed to save expense');
@@ -90,7 +90,8 @@ const Expenses = () => {
       amount: expense.amount,
       category: expense.category,
       description: expense.description,
-      date: expense.date.split('T')[0]
+      date: expense.date.split('T')[0],
+      budgetCategory: expense.budgetCategory || ''
     });
     setEditingId(expense._id);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -102,7 +103,8 @@ const Expenses = () => {
       amount: '',
       category: 'Food',
       description: '',
-      date: new Date().toISOString().split('T')[0]
+      date: new Date().toISOString().split('T')[0],
+      budgetCategory: ''
     });
   };
 
@@ -116,11 +118,6 @@ const Expenses = () => {
   }
 };
 
-
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
 
   const getCategoryIcon = (category) => {
     const icons = {
@@ -165,27 +162,6 @@ const Expenses = () => {
           </div>
         </div>
       )}
-
-      {/* Header */}
-      <header className="page-header expense-header">
-        <div className="header-content">
-          <div>
-            <h1 className="page-title">
-              <span className="emoji">💰</span>
-              <span className="gradient-text">ByteBudget</span>
-            </h1>
-            <p className="page-subtitle">Track Your Expenses 📉</p>
-          </div>
-          <div className="header-actions">
-            <button id="nav-dashboard" name="nav-dashboard" onClick={() => navigate('/dashboard')} className="btn btn-secondary">
-              ← Dashboard
-            </button>
-            <button id="nav-logout" name="nav-logout" onClick={handleLogout} className="btn btn-outline">
-              Logout
-            </button>
-          </div>
-        </div>
-      </header>
 
       <main className="transactions-main">
         <div className="transactions-container">
@@ -246,6 +222,24 @@ const Expenses = () => {
                   onChange={handleChange}
                   placeholder="What did you spend on?"
                 />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="budgetCategory" className="form-label">
+                  Budget Rule Category
+                </label>
+                <select
+                  id="budgetCategory"
+                  name="budgetCategory"
+                  className="form-input"
+                  value={formData.budgetCategory}
+                  onChange={handleChange}
+                >
+                  <option value="">— Not categorized —</option>
+                  <option value="Need">🏠 Need (50% target)</option>
+                  <option value="Want">🎬 Want (30% target)</option>
+                  <option value="Savings/Investment">💰 Savings / Investment (20% target)</option>
+                </select>
               </div>
 
               <div className="form-group">

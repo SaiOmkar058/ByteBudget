@@ -10,6 +10,10 @@ import Expenses from './pages/Expenses';
 import Income from './pages/Income';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
+import Layout from './components/Layout';
+import SalaryCalculator from './pages/SalaryCalculator';
+import Subscriptions from './pages/Subscriptions';
+import DebtTracker from './pages/DebtTracker';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -33,71 +37,26 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
 
-            {/* Protected Routes */}
+            {/* Protected Routes Wrapped under Layout */}
             <Route
-              path="/dashboard"
               element={
                 <ProtectedRoute>
-                  <Dashboard />
+                  <Layout />
                 </ProtectedRoute>
               }
-            />
-            <Route
-              path="/transactions"
-              element={
-                <ProtectedRoute>
-                  <Transactions />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/expenses"
-              element={
-                <ProtectedRoute>
-                  <Expenses />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/reports"
-              element={
-                <ProtectedRoute>
-                  <Reports />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/settings"
-              element={
-                <ProtectedRoute>
-                  <Settings />
-                </ProtectedRoute>
-                }
-              />
-            <Route
-              path="/income"
-              element={
-                <ProtectedRoute>
-                  <Income />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/income/add"
-              element={
-                <ProtectedRoute>
-                  <Income />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/expenses/add"
-              element={
-                <ProtectedRoute>
-                  <Expenses />
-                </ProtectedRoute>
-              }
-            />
+            >
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/transactions" element={<Transactions />} />
+              <Route path="/expenses" element={<Expenses />} />
+              <Route path="/expenses/add" element={<Expenses />} />
+              <Route path="/income" element={<Income />} />
+              <Route path="/income/add" element={<Income />} />
+              <Route path="/reports" element={<Reports />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/salary-calculator" element={<SalaryCalculator />} />
+              <Route path="/subscriptions" element={<Subscriptions />} />
+              <Route path="/debts" element={<DebtTracker />} />
+            </Route>
 
             {/* Catch-all: redirect unknown routes to landing */}
             <Route path="*" element={<Navigate to="/" />} />

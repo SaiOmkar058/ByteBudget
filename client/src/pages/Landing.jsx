@@ -1,9 +1,11 @@
 import { useScrollFadeUp } from '../hooks/useScrollFadeUp';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
 import '../styles/Landing.css';
 
 const Landing = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   // scroll animations for sections
   const featuresAnim = useScrollFadeUp();
@@ -20,18 +22,29 @@ const Landing = () => {
             <span className="logo-text">ByteBudget</span>
           </div>
           <div className="landing-nav-actions">
-            <button
-              className="btn btn-outline landing-nav-btn"
-              onClick={() => navigate('/login')}
-            >
-              Log in
-            </button>
-            <button
-              className="btn btn-primary landing-nav-btn"
-              onClick={() => navigate('/register')}
-            >
-              Get started
-            </button>
+            {user ? (
+              <button
+                className="btn btn-primary landing-nav-btn"
+                onClick={() => navigate('/dashboard')}
+              >
+                Go to Dashboard →
+              </button>
+            ) : (
+              <>
+                <button
+                  className="btn btn-outline landing-nav-btn"
+                  onClick={() => navigate('/login')}
+                >
+                  Log in
+                </button>
+                <button
+                  className="btn btn-primary landing-nav-btn"
+                  onClick={() => navigate('/register')}
+                >
+                  Get started
+                </button>
+              </>
+            )}
           </div>
         </nav>
 
@@ -43,18 +56,29 @@ const Landing = () => {
               simple dashboard. See where your money goes and build healthy habits.
             </p>
             <div className="landing-hero-actions">
-              <button
-                className="btn btn-primary"
-                onClick={() => navigate('/register')}
-              >
-                Start tracking for free
-              </button>
-              <button
-                className="btn btn-secondary"
-                onClick={() => navigate('/login')}
-              >
-                I already have an account
-              </button>
+              {user ? (
+                <button
+                  className="btn btn-primary"
+                  onClick={() => navigate('/dashboard')}
+                >
+                  Go to Dashboard →
+                </button>
+              ) : (
+                <>
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => navigate('/register')}
+                  >
+                    Start tracking for free
+                  </button>
+                  <button
+                    className="btn btn-secondary"
+                    onClick={() => navigate('/login')}
+                  >
+                    I already have an account
+                  </button>
+                </>
+              )}
             </div>
             <p className="landing-small-text">
               No credit card. No ads. Just a simple expense tracker.
@@ -212,18 +236,29 @@ const Landing = () => {
             distraction‑free tool.
           </p>
           <div className="landing-hero-actions">
-            <button
-              className="btn btn-primary"
-              onClick={() => navigate('/register')}
-            >
-              Create your free account
-            </button>
-            <button
-              className="btn btn-outline"
-              onClick={() => navigate('/login')}
-            >
-              Log in instead
-            </button>
+            {user ? (
+              <button
+                className="btn btn-primary"
+                onClick={() => navigate('/dashboard')}
+              >
+                Go to Dashboard →
+              </button>
+            ) : (
+              <>
+                <button
+                  className="btn btn-primary"
+                  onClick={() => navigate('/register')}
+                >
+                  Create your free account
+                </button>
+                <button
+                  className="btn btn-outline"
+                  onClick={() => navigate('/login')}
+                >
+                  Log in instead
+                </button>
+              </>
+            )}
           </div>
         </div>
       </section>

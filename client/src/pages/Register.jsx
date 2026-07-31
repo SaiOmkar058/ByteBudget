@@ -61,8 +61,7 @@ const Register = () => {
         message: err.response?.data?.message || 'Registration failed. Please try again.' 
       });
     } finally {
-      // Don't set loading false on success to prevent button flicker during redirect
-      if (!error) setLoading(false);
+      setLoading(false);
     }
   };
 
@@ -85,7 +84,15 @@ const Register = () => {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="auth-form">
+      <form 
+        onSubmit={handleSubmit} 
+        className="auth-form"
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            handleSubmit(e);
+          }
+        }}
+      >
         <div className="form-group">
           <label htmlFor="name" className="form-label">
             Full Name
@@ -151,7 +158,7 @@ const Register = () => {
           />
         </div>
 
-        <button id="submit-register" name="submit-register" type="submit" className="btn-primary" disabled={loading}>
+        <button id="submit-register" name="submit-register" type="submit" className="btn btn-primary btn-block" disabled={loading}>
           {loading ? 'Creating account...' : 'Create Account'}
         </button>
       </form>

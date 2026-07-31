@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { useAuth } from '../hooks/useAuth';
 import api from '../services/api';
 import '../styles/Transactions.css';
 
 const Income = () => {
-  const { logout } = useAuth();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -36,7 +34,7 @@ const Income = () => {
     }
   };
 
-  const categories = ['Salary', 'Freelance', 'Business', 'Investment', 'Gift', 'Bonus', 'Other'];
+  const categories = ['Salary', 'Freelance', 'Business', 'Investment', 'Pocket Money / Allowance', 'Gift', 'Bonus', 'Other'];
 
   const handleChange = (e) => {
     setFormData({
@@ -117,17 +115,13 @@ const Income = () => {
 };
 
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
-
   const getCategoryIcon = (category) => {
     const icons = {
       Salary: '💼',
       Freelance: '💻',
       Business: '🏢',
       Investment: '📈',
+      'Pocket Money / Allowance': '👪',
       Gift: '🎁',
       Bonus: '💰',
       Other: '💵'
@@ -164,27 +158,6 @@ const Income = () => {
           </div>
         </div>
       )}
-
-      {/* Header */}
-      <header className="page-header income-header">
-        <div className="header-content">
-          <div>
-            <h1 className="page-title">
-              <span className="emoji">💰</span>
-              <span className="gradient-text">ByteBudget</span>
-            </h1>
-            <p className="page-subtitle">Track Your Income 📈</p>
-          </div>
-          <div className="header-actions">
-            <button id="nav-dashboard" name="nav-dashboard" onClick={() => navigate('/dashboard')} className="btn btn-secondary">
-              ← Dashboard
-            </button>
-            <button id="nav-logout" name="nav-logout" onClick={handleLogout} className="btn btn-outline">
-              Logout
-            </button>
-          </div>
-        </div>
-      </header>
 
       <main className="transactions-main">
         <div className="transactions-container">

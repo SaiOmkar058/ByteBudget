@@ -23,15 +23,13 @@ ChartJS.register(
   Filler
 );
 
-export const ExpenseChart = ({ data }) => {
-  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
+export const ExpenseChart = ({ data, selectedPeriod, onPeriodChange }) => {
   const chartData = {
-    labels: monthNames,
+    labels: data?.labels || [],
     datasets: [
       {
         label: 'Income',
-        data: data?.income || new Array(12).fill(0),
+        data: data?.income || [],
         borderColor: '#10B981',
         backgroundColor: 'rgba(16, 185, 129, 0.1)',
         tension: 0.3,
@@ -44,7 +42,7 @@ export const ExpenseChart = ({ data }) => {
       },
       {
         label: 'Expenses',
-        data: data?.expenses || new Array(12).fill(0),
+        data: data?.expenses || [],
         borderColor: '#EF4444',
         backgroundColor: 'rgba(239, 68, 68, 0.1)',
         tension: 0.3,
@@ -67,11 +65,8 @@ export const ExpenseChart = ({ data }) => {
         labels: {
           usePointStyle: true,
           padding: 20,
-          font: {
-            size: 12,
-            weight: '500'
-          }
-        }
+          font: { size: 12, weight: '500' },
+        },
       },
       tooltip: {
         mode: 'index',
@@ -84,57 +79,46 @@ export const ExpenseChart = ({ data }) => {
         cornerRadius: 8,
         padding: 12,
         callbacks: {
-          label: function(context) {
-            return `${context.dataset.label}: ₹${context.parsed.y.toLocaleString()}`;
-          }
-        }
+          label: function (context) {
+            return `${context.dataset.label}: ₹${context.parsed.y.toLocaleString('en-IN')}`;
+          },
+        },
       },
     },
     scales: {
       y: {
         beginAtZero: true,
-        grid: {
-          drawBorder: false,
-          color: 'rgba(0, 0, 0, 0.05)',
-        },
+        grid: { drawBorder: false, color: 'rgba(0, 0, 0, 0.05)' },
         ticks: {
-          callback: function(value) {
-            return '₹' + value.toLocaleString();
+          callback: function (value) {
+            return '₹' + value.toLocaleString('en-IN');
           },
-          font: {
-            size: 11
-          }
-        }
+          font: { size: 11 },
+        },
       },
       x: {
-        grid: {
-          display: false,
-        },
-        ticks: {
-          font: {
-            size: 11
-          }
-        }
+        grid: { display: false },
+        ticks: { font: { size: 11 } },
       },
     },
-    interaction: {
-      mode: 'nearest',
-      axis: 'x',
-      intersect: false
-    },
-    animation: {
-      duration: 1000,
-      easing: 'easeInOutQuart'
-    }
+    interaction: { mode: 'nearest', axis: 'x', intersect: false },
+    animation: { duration: 1000, easing: 'easeInOutQuart' },
   };
 
   return (
     <div className="chart-container">
       <div className="chart-header">
         <h3 className="chart-title">Income vs Expenses</h3>
-        <select className="chart-period-selector">
-          <option>This Year</option>
-          <option>Last Year</option>
+        <select
+          className="chart-period-selector"
+          value={selectedPeriod}
+          onChange={(e) => onPeriodChange(e.target.value)}
+        >
+          <option value="this-month">This Month</option>
+          <option value="last-6-months">Last 6 Months</option>
+          <option value="this-year">This Year</option>
+          <option value="last-year">Last Year</option>
+          <option value="all-time">All Time</option>
         </select>
       </div>
       <div className="chart-wrapper">
@@ -143,4 +127,3 @@ export const ExpenseChart = ({ data }) => {
     </div>
   );
 };
-
