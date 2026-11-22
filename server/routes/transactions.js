@@ -7,6 +7,7 @@ const {
   deleteTransaction,
   getStats,
   automateEMIDeductions,
+  getBudgetStats,
 } = require('../controllers/transactionController');
 const { protect } = require('../middleware/auth');
 
@@ -17,5 +18,6 @@ router.get('/stats', protect, getStats);
 router.post('/automate-emi', protect, automateEMIDeductions);
 router.put('/:id', protect, updateTransaction);
 router.delete('/:id', protect, deleteTransaction);
+router.get('/budget-stats', protect, getBudgetStats);
 
 module.exports = router;

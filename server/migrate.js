@@ -4,10 +4,13 @@ const dotenv = require('dotenv');
 // Load environment variables
 dotenv.config();
 
-const ATLAS_URI = 'mongodb+srv://bytebudget_user:Byt3Budg3t_us3r@bytebudget.1wa00ze.mongodb.net/bytebudget?appName=ByteBudget';
+const ATLAS_URI = process.env.ATLAS_URI;
 const LOCAL_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/bytebudget';
 
 async function runMigration() {
+  if (!ATLAS_URI) {
+    throw new Error('ATLAS_URI must be set to run the migration');
+  }
   console.log('🔄 Connecting to MongoDB Atlas (Source)...');
   const atlasConn = await mongoose.createConnection(ATLAS_URI).asPromise();
   console.log('✅ Connected to MongoDB Atlas.');

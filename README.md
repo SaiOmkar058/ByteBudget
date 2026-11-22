@@ -1,140 +1,112 @@
 # ByteBudget
 
-A full-stack personal finance and budget tracking application built with React and Node.js. ByteBudget helps users manage their income, expenses, and financial goals through an intuitive dashboard, transaction tracking, and insightful reports.
+ByteBudget is a personal-finance web application with a React frontend and an Express/MongoDB API. Accounts are isolated by JWT-authenticated user ID.
 
-## Features
+## Verified functionality
 
-- **User Authentication**: Secure login and registration with JWT tokens
-- **Dashboard**: Overview of financial status with stats cards and expense charts
-- **Transaction Management**: Add, view, and categorize income and expenses
-- **Reports**: Visualize spending patterns and financial insights
-- **Settings**: User profile management
-- **Responsive Design**: Works seamlessly on desktop and mobile devices
-- **Real-time Updates**: Live data synchronization between frontend and backend
+- Register, sign in, restore an authenticated session, and sign out.
+- Update the signed-in user's display name and change their password after supplying the current password.
+- Create, list, edit, delete, search, filter, and sort income and expense transactions.
+- Categorize transactions. Expense entries can also be assigned to a Need, Want, or Savings/Investment budget-rule category.
+- View dashboard totals, recent transactions, category spending, a budget gauge, and time-period chart data calculated from the account's transactions.
+- View reports with all-recorded income, expenses, balance, savings rate, recent monthly trends, and expense-category breakdowns.
+- Track subscriptions, including active/inactive status, billing cycle, due date, and calculated monthly/yearly equivalents.
+- Track debts and EMI progress. The **Trigger EMI** button is a manual simulation: it creates one expense transaction and increments every eligible automated debt each time it is pressed.
+- Calculate an estimated Indian take-home salary for the Old and New regimes (FY 2025–26) and save the selected monthly result as an income transaction.
 
-## Tech Stack
+## Important limitations
 
-### Frontend
-- React 19
-- Vite (build tool)
-- React Router DOM (routing)
-- Chart.js & Recharts (data visualization)
-- Axios (HTTP client)
-- React Toastify (notifications)
-- CSS Modules (styling)
+- Budget and savings-goal settings are stored only in the browser's local storage; they are not shared across devices or accounts.
+- EMI deductions are not scheduled automatically. Re-running the manual trigger can create another EMI transaction for an eligible debt.
+- Reports and dashboard values are calculated client-side from the transactions returned by the API. There is no real-time push synchronization.
+- Monetary display is currently formatted as INR throughout the UI.
 
-### Backend
-- Node.js
-- Express.js
-- MongoDB with Mongoose (database)
-- JWT (authentication)
-- bcryptjs (password hashing)
-- CORS (cross-origin resource sharing)
+## Technology
 
-## Installation
+### Client
 
-### Prerequisites
-- Node.js (v16 or higher)
-- MongoDB (local or cloud instance)
-- npm or yarn
+- React 19 and Vite
+- React Router DOM
+- Axios
+- Chart.js / react-chartjs-2 and Recharts
+- Plain CSS stylesheets
 
-### Setup
+### Server
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd ByteBudget
-   ```
+- Node.js and Express
+- MongoDB with Mongoose
+- JSON Web Tokens and bcryptjs
 
-2. **Install server dependencies**
+## Setup
+
+Prerequisites: Node.js, npm, and a running MongoDB instance.
+
+1. Install dependencies.
+
    ```bash
    cd server
    npm install
-   ```
-
-3. **Install client dependencies**
-   ```bash
    cd ../client
    npm install
    ```
 
-4. **Environment Variables**
-   Create a `.env` file in the `server` directory with:
-   ```
+2. Create `server/.env`:
+
+   ```env
    PORT=5000
-   MONGO_URI=your_mongodb_connection_string
-   JWT_SECRET=your_jwt_secret
+   MONGO_URI=mongodb://127.0.0.1:27017/bytebudget
+   JWT_SECRET=replace-with-a-long-random-secret
    ```
 
-5. **Start the application**
-   - Start the backend server:
-     ```bash
-     cd server
-     npm run dev
-     ```
-   - Start the frontend client:
-     ```bash
-     cd client
-     npm run dev
-     ```
+3. Start the API in one terminal.
 
-6. **Access the application**
-   Open [http://localhost:5173](http://localhost:5173) in your browser.
+   ```bash
+   cd server
+   npm run dev
+   ```
 
-## Usage
+4. Start the client in a second terminal.
 
-1. **Register**: Create a new account or login with existing credentials
-2. **Dashboard**: View your financial overview, recent transactions, and expense charts
-3. **Add Transactions**: Navigate to Income or Expenses pages to add new transactions
-4. **View Transactions**: Check all transactions on the Transactions page
-5. **Reports**: Analyze your spending patterns in the Reports section
-6. **Settings**: Update your profile information
+   ```bash
+   cd client
+   npm run dev
+   ```
 
-## API Endpoints
+Open the URL printed by Vite (normally `http://localhost:5173`). The client uses `http://localhost:5000/api` by default; set `VITE_API_URL` in the client environment to use another API base URL.
 
-### Authentication
-- `POST /api/auth/register` - User registration
-- `POST /api/auth/login` - User login
+## API
 
-### Transactions
-- `GET /api/transactions` - Get all user transactions
-- `POST /api/transactions` - Create a new transaction
-- `PUT /api/transactions/:id` - Update a transaction
-- `DELETE /api/transactions/:id` - Delete a transaction
+All endpoints other than registration and login require `Authorization: Bearer <token>`.
 
-## Project Structure
+| Area | Endpoints |
+| --- | --- |
+| Authentication | `POST /api/auth/register`, `POST /api/auth/login`, `GET /api/auth/me`, `PUT /api/auth/profile`, `PUT /api/auth/password` |
+| Transactions | `GET`, `POST /api/transactions`; `GET /api/transactions/stats`; `PUT`, `DELETE /api/transactions/:id`; `POST /api/transactions/automate-emi` |
+| Subscriptions | `GET`, `POST /api/subscriptions`; `PUT`, `DELETE /api/subscriptions/:id` |
+| Debts | `GET`, `POST /api/debts`; `PUT`, `DELETE /api/debts/:id` |
 
-```
+`POST /api/transactions/automate-emi` is the manual EMI simulation described above, not a background scheduler.
+
+## Project layout
+
+```text
 ByteBudget/
-├── client/          # React frontend
-│   ├── src/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   ├── contexts/
-│   │   ├── hooks/
-│   │   ├── services/
-│   │   └── styles/
-│   ├── public/
-│   └── package.json
-├── server/          # Node.js backend
-│   ├── config/
-│   ├── controllers/
-│   ├── middleware/
-│   ├── models/
-│   ├── routes/
-│   └── package.json
-├── .gitignore
-└── README.md
+├── client/                 # React/Vite frontend
+│   └── src/
+│       ├── components/
+│       ├── contexts/
+│       ├── pages/
+│       ├── services/
+│       ├── styles/
+│       └── utils/
+└── server/                 # Express API
+    ├── config/
+    ├── controllers/
+    ├── middleware/
+    ├── models/
+    └── routes/
 ```
 
-## Contributing
+## Validation
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## License
-
-This project is licensed under the ISC License.
+The client has `npm run lint` and `npm run build` scripts. The server currently has start and development scripts but no automated test script.

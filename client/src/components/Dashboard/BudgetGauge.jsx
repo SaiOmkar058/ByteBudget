@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatCurrency } from '../../utils/currency';
 
 /**
  * BudgetGauge — 50/30/20 Rule Circular Ring Visualizer
@@ -13,7 +14,7 @@ const RULES = [
   { key: 'savings', label: 'Savings',  target: 0.20, color: '#10b981', track: 'rgba(16,185,129,0.12)', icon: '💰' },
 ];
 
-function Ring({ cx, cy, r, strokeWidth, trackColor, fillColor, percent, label, animate }) {
+function Ring({ cx, cy, r, strokeWidth, trackColor, fillColor, percent }) {
   const circumference = 2 * Math.PI * r;
   const fillOffset = circumference * (1 - Math.min(percent / 100, 1));
   return (
@@ -38,7 +39,7 @@ function Ring({ cx, cy, r, strokeWidth, trackColor, fillColor, percent, label, a
   );
 }
 
-const BudgetGauge = ({ transactions = [] }) => {
+const BudgetGauge = ({ transactions = [], currency = 'INR' }) => {
   const now = new Date();
   const currentMonth = now.getMonth();
   const currentYear = now.getFullYear();
@@ -129,7 +130,7 @@ const BudgetGauge = ({ transactions = [] }) => {
             ))}
             {/* Center label */}
             <text x={cx} y={cy - 10} textAnchor="middle" className="gauge-center-label">
-              {hasIncome ? `₹${totalIncome.toLocaleString('en-IN')}` : '—'}
+              {hasIncome ? formatCurrency(totalIncome, currency) : '—'}
             </text>
             <text x={cx} y={cy + 12} textAnchor="middle" className="gauge-center-sub">
               {hasIncome ? 'This Month' : 'No Income'}
@@ -151,7 +152,7 @@ const BudgetGauge = ({ transactions = [] }) => {
                   <div>
                     <p className="gauge-row-label">{rule.icon} {rule.label}</p>
                     <p className="gauge-row-sub">
-                      ₹{spent.toLocaleString('en-IN')} / ₹{Math.round(target).toLocaleString('en-IN')}
+                      {formatCurrency(spent, currency)} / {formatCurrency(Math.round(target), currency)}
                     </p>
                   </div>
                 </div>

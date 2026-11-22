@@ -6,23 +6,10 @@ import { StatsCard } from '../components/Dashboard/StatsCard';
 import { RecentTransactions } from '../components/Dashboard/RecentTransactions';
 import { ExpenseChart } from '../components/Dashboard/ExpenseChart';
 import BudgetGauge from '../components/Dashboard/BudgetGauge';
+import { getCategoryDetails, normalizeCategory } from '../utils/categories';
 import '../styles/Dashboard.css';
 
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-const getCategoryDetails = (category) => {
-  const details = {
-    Food: { icon: '🍔', gradient: 'linear-gradient(90deg, #10b981 0%, #34d399 100%)', color: '#10b981' },
-    Transport: { icon: '🚗', gradient: 'linear-gradient(90deg, #3b82f6 0%, #60a5fa 100%)', color: '#3b82f6' },
-    Entertainment: { icon: '🎬', gradient: 'linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%)', color: '#f59e0b' },
-    Shopping: { icon: '🛍️', gradient: 'linear-gradient(90deg, #ef4444 0%, #f87171 100%)', color: '#ef4444' },
-    Bills: { icon: '📄', gradient: 'linear-gradient(90deg, #8b5cf6 0%, #a78bfa 100%)', color: '#8b5cf6' },
-    Healthcare: { icon: '🏥', gradient: 'linear-gradient(90deg, #ec4899 0%, #f472b6 100%)', color: '#ec4899' },
-    Education: { icon: '📚', gradient: 'linear-gradient(90deg, #06b6d4 0%, #22d3ee 100%)', color: '#06b6d4' },
-    Other: { icon: '📦', gradient: 'linear-gradient(90deg, #6b7280 0%, #9ca3af 100%)', color: '#6b7280' },
-  };
-  return details[category] || { icon: '📦', gradient: 'linear-gradient(90deg, #6b7280 0%, #9ca3af 100%)', color: '#6b7280' };
-};
 
 /**
  * Build chart data object for a list of {label, income, expenses} points.
@@ -187,13 +174,14 @@ const Dashboard = () => {
     monthlyBudget: Number(localStorage.getItem('monthlyBudget')) || 35000,
   });
   const [spendingByCategory, setSpendingByCategory] = useState([]);
+  const [budgetAlerts, setBudgetAlerts] = useState([]);
   const [chartPeriod, setChartPeriod] = useState('this-year');
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
         const txRes = await api.get('/transactions');
-        const transactions = txRes.data || [];
+        const transactions = Array.isArray(txRes.data) ? txRes.data : [];
         transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
 
         setAllTransactions(transactions);
@@ -218,13 +206,23 @@ const Dashboard = () => {
           .filter((t) => t.type === 'expense')
           .forEach((t) => {
             if (!t.category) return;
-            categoryMap.set(t.category, (categoryMap.get(t.category) || 0) + (Number(t.amount) || 0));
+            const norm = normalizeCategory(t.category, 'expense');
+            categoryMap.set(norm, (categoryMap.get(norm) || 0) + (Number(t.amount) || 0));
           });
         setSpendingByCategory(
           Array.from(categoryMap.entries())
             .map(([category, amount]) => ({ category, amount }))
             .sort((a, b) => b.amount - a.amount)
         );
+
+        try {
+          const statsRes = await api.get('/transactions/budget-stats');
+          if (statsRes.data?.warnings) {
+            setBudgetAlerts(statsRes.data.warnings);
+          }
+        } catch {
+          // budget-stats is optional
+        }
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
       }

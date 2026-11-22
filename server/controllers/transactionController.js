@@ -20,14 +20,23 @@ const getTransactions = async (req, res) => {
 // @access  Private
 const createTransaction = async (req, res) => {
   try {
-    const { type, category, amount, description, date } = req.body;
+    const { type, category, subcategory, amount, description, budgetCategory, date } = req.body;
+
+    let finalBudgetCategory = budgetCategory;
+    if (type === 'expense' && (!finalBudgetCategory || finalBudgetCategory === '')) {
+      if (category === 'Investments' || category === 'Investment') {
+        finalBudgetCategory = 'Savings/Investment';
+      }
+    }
 
     const transaction = await Transaction.create({
       user: req.user._id,
       type,
       category,
+      subcategory: subcategory || '',
       amount,
       description,
+      budgetCategory: finalBudgetCategory,
       date,
     });
 
@@ -53,9 +62,14 @@ const updateTransaction = async (req, res) => {
       return res.status(401).json({ message: 'Not authorized' });
     }
 
+    const allowedFields = ['type', 'category', 'subcategory', 'amount', 'description', 'budgetCategory', 'date'];
+    const updates = Object.fromEntries(
+      Object.entries(req.body).filter(([key]) => allowedFields.includes(key))
+    );
+
     const updatedTransaction = await Transaction.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      updates,
       { new: true, runValidators: true }
     );
 
@@ -121,8 +135,6 @@ const getStats = async (req, res) => {
 // @desc    Simulate automated EMI deductions for debts with automateEMI: true
 // @route   POST /api/transactions/automate-emi
 // @access  Private
-// NOTE: This function is designed to be cron-ready. You can plug it directly into
-// a node-cron job in server.js (e.g., '0 0 1 * *' = 1st of every month).
 const automateEMIDeductions = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -176,6 +188,81 @@ const automateEMIDeductions = async (req, res) => {
   }
 };
 
+// @desc    Get budget statistics (spending by category vs budget)
+// @route   GET /api/transactions/budget-stats
+// @access  Private
+const getBudgetStats = async (req, res) => {
+  try {
+    const transactions = await Transaction.find({ user: req.user._id });
+
+    // Initialize budget tracking for each category
+    const budgetCategories = {
+      Need: Number(req.user.preferences?.monthlyBudget) || 35000,
+      Want: 0,
+      'Savings/Investment': Number(req.user.preferences?.savingsGoal) || 10000,
+    };
+
+    // Track spending per category
+    const spendingByCategory = {
+      Need: 0,
+      Want: 0,
+      'Savings/Investment': 0,
+    };
+
+    transactions.forEach((transaction) => {
+      if (transaction.type !== 'expense') return;
+
+      const category = transaction.budgetCategory || '';
+      const amount = Number(transaction.amount) || 0;
+
+      // Only count recognized budget categories
+      if (budgetCategories[category] !== undefined) {
+        spendingByCategory[category] += amount;
+      }
+
+      // Also count uncategorized expenses under 'Want' as default
+      if (!category || category === '') {
+        spendingByCategory.Want += amount;
+      }
+    });
+
+    // Calculate budget status
+    const budgetStats = {
+      monthlyBudget: budgetCategories.Need,
+      spendingByCategory,
+      budgetRemaining: {
+        Need: (Number(req.user.preferences?.monthlyBudget) || 35000) - spendingByCategory.Need,
+        Want: (0) - spendingByCategory.Want, // No set limit for Want
+        'Savings/Investment': (Number(req.user.preferences?.savingsGoal) || 10000) - spendingByCategory['Savings/Investment'],
+      },
+      percentageUsed: {
+        Need: spendingByCategory.Need > 0 ? Math.round((spendingByCategory.Need / (Number(req.user.preferences?.monthlyBudget) || 35000)) * 100) : 0,
+        Want: 0,
+        'Savings/Investment': spendingByCategory['Savings/Investment'] > 0 ? Math.round((spendingByCategory['Savings/Investment'] / (Number(req.user.preferences?.savingsGoal) || 10000)) * 100) : 0,
+      },
+      warnings: [],
+    };
+
+    // Add warnings for over-budget categories
+    if (budgetStats.percentageUsed.Need > 100) {
+      budgetStats.warnings.push({
+        category: 'Need',
+        message: 'You have exceeded your monthly budget for Need expenses!',
+      });
+    }
+    if (budgetStats.percentageUsed['Savings/Investment'] > 80 && budgetStats.percentageUsed['Savings/Investment'] <= 100) {
+      budgetStats.warnings.push({
+        category: 'Savings/Investment',
+        message: 'You have used most of your savings goal. Consider reviewing your spending.',
+      });
+    }
+
+    res.json(budgetStats);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getTransactions,
   createTransaction,
@@ -183,4 +270,5 @@ module.exports = {
   deleteTransaction,
   getStats,
   automateEMIDeductions,
+  getBudgetStats,
 };

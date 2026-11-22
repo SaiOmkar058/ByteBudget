@@ -35,13 +35,13 @@ const Landing = () => {
                   className="btn btn-outline landing-nav-btn"
                   onClick={() => navigate('/login')}
                 >
-                  Log in
+                  Login
                 </button>
                 <button
                   className="btn btn-primary landing-nav-btn"
                   onClick={() => navigate('/register')}
                 >
-                  Get started
+                  Get Started
                 </button>
               </>
             )}
@@ -69,13 +69,13 @@ const Landing = () => {
                     className="btn btn-primary"
                     onClick={() => navigate('/register')}
                   >
-                    Start tracking for free
+                    Get Started
                   </button>
                   <button
                     className="btn btn-secondary"
                     onClick={() => navigate('/login')}
                   >
-                    I already have an account
+                    Login
                   </button>
                 </>
               )}
@@ -249,13 +249,13 @@ const Landing = () => {
                   className="btn btn-primary"
                   onClick={() => navigate('/register')}
                 >
-                  Create your free account
+                  Get Started
                 </button>
                 <button
                   className="btn btn-outline"
                   onClick={() => navigate('/login')}
                 >
-                  Log in instead
+                  Login
                 </button>
               </>
             )}

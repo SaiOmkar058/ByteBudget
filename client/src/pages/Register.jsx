@@ -51,10 +51,10 @@ const Register = () => {
       await register(formData.name, formData.email, formData.password);
       setStatus({ 
         type: 'success', 
-        message: 'Account created successfully! Redirecting to login...' 
+        message: 'Account created successfully! Redirecting to your dashboard...' 
       });
       // Delay redirect to allow user to see success message
-      setTimeout(() => navigate('/login'), 1500);
+      setTimeout(() => navigate('/dashboard'), 1000);
     } catch (err) {
       setStatus({ 
         type: 'error', 

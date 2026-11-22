@@ -39,4 +39,7 @@ const subscriptionSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+subscriptionSchema.index({ user: 1, nextDueDate: 1 });
+subscriptionSchema.index({ user: 1, isActive: 1 });
+
 module.exports = mongoose.model('Subscription', subscriptionSchema);

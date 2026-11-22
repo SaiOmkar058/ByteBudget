@@ -45,7 +45,11 @@ const updateSubscription = async (req, res) => {
     if (subscription.user.toString() !== req.user._id.toString()) {
       return res.status(401).json({ message: 'Not authorized' });
     }
-    const updated = await Subscription.findByIdAndUpdate(req.params.id, req.body, {
+    const allowedFields = ['name', 'amount', 'billingCycle', 'category', 'nextDueDate', 'isActive'];
+    const updates = Object.fromEntries(
+      Object.entries(req.body).filter(([key]) => allowedFields.includes(key))
+    );
+    const updated = await Subscription.findByIdAndUpdate(req.params.id, updates, {
       new: true,
       runValidators: true,
     });

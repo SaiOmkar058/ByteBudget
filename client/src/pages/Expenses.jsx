@@ -1,18 +1,27 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import api from '../services/api';
+import { formatCurrency } from '../utils/currency';
+import {
+  EXPENSE_CATEGORIES,
+  getCategoryIcon,
+  getSubcategories,
+  getDefaultBudgetCategory,
+  normalizeCategory,
+} from '../utils/categories';
 import '../styles/Transactions.css';
 
 const Expenses = () => {
-  const navigate = useNavigate();
+  const location = useLocation();
 
   const [formData, setFormData] = useState({
     amount: '',
-    category: 'Food',
+    category: 'Food & Dining',
+    subcategory: '',
     description: '',
     date: new Date().toISOString().split('T')[0],
-    budgetCategory: ''
+    budgetCategory: 'Need',
   });
 
   const [expenses, setExpenses] = useState([]);
@@ -23,6 +32,13 @@ const Expenses = () => {
   useEffect(() => {
     fetchExpenses();
   }, []);
+
+  useEffect(() => {
+    if (location.state?.editTransaction?.type === 'expense') {
+      handleEdit(location.state.editTransaction);
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   const fetchExpenses = async () => {
     try {
@@ -35,63 +51,76 @@ const Expenses = () => {
     }
   };
 
-  const categories = ['Food', 'Transport', 'Entertainment', 'Shopping', 'Bills', 'Healthcare', 'Education', 'Other'];
+  const handleCategoryChange = (e) => {
+    const newCategory = e.target.value;
+    const availableSubs = getSubcategories(newCategory, 'expense');
+    const autoBudget = getDefaultBudgetCategory(newCategory);
+    setFormData((prev) => ({
+      ...prev,
+      category: newCategory,
+      subcategory: availableSubs.includes(prev.subcategory) ? prev.subcategory : '',
+      budgetCategory: autoBudget,
+    }));
+  };
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (!formData.amount || formData.amount <= 0) {
-    toast.error('Please enter a valid amount');
-    return;
-  }
-
-  try {
-    if (editingId) {
-      // Update expense
-      const res = await api.put(`/transactions/${editingId}`, {
-        ...formData,
-        type: 'expense',
-        amount: Number(formData.amount),
-      });
-      setExpenses(expenses.map(exp => exp._id === editingId ? res.data : exp));
-      setEditingId(null);
-    } else {
-      // Add new expense
-      const res = await api.post('/transactions', {
-        ...formData,
-        type: 'expense',
-        amount: Number(formData.amount),
-      });
-      setExpenses([res.data, ...expenses]);
-      toast.success('Expense added successfully!');
+    e.preventDefault();
+    if (!formData.amount || formData.amount <= 0) {
+      toast.error('Please enter a valid amount');
+      return;
     }
 
-    setFormData({
-      amount: '',
-      category: 'Food',
-      description: '',
-      date: new Date().toISOString().split('T')[0],
-      budgetCategory: ''
-    });
-  } catch (err) {
-    toast.error(err.response?.data?.message || 'Failed to save expense');
-  }
-};
+    try {
+      if (editingId) {
+        // Update expense
+        const res = await api.put(`/transactions/${editingId}`, {
+          ...formData,
+          type: 'expense',
+          amount: Number(formData.amount),
+        });
+        setExpenses(expenses.map(exp => exp._id === editingId ? res.data : exp));
+        setEditingId(null);
+        toast.success('Expense updated successfully!');
+      } else {
+        // Add new expense
+        const res = await api.post('/transactions', {
+          ...formData,
+          type: 'expense',
+          amount: Number(formData.amount),
+        });
+        setExpenses([res.data, ...expenses]);
+        toast.success('Expense added successfully!');
+      }
 
+      setFormData({
+        amount: '',
+        category: 'Food & Dining',
+        subcategory: '',
+        description: '',
+        date: new Date().toISOString().split('T')[0],
+        budgetCategory: 'Need',
+      });
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to save expense');
+    }
+  };
 
   const handleEdit = (expense) => {
+    const normalizedCat = normalizeCategory(expense.category, 'expense');
     setFormData({
       amount: expense.amount,
-      category: expense.category,
-      description: expense.description,
-      date: expense.date.split('T')[0],
-      budgetCategory: expense.budgetCategory || ''
+      category: normalizedCat,
+      subcategory: expense.subcategory || '',
+      description: expense.description || '',
+      date: expense.date ? expense.date.split('T')[0] : new Date().toISOString().split('T')[0],
+      budgetCategory: expense.budgetCategory || getDefaultBudgetCategory(normalizedCat, expense.subcategory),
     });
     setEditingId(expense._id);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -101,38 +130,26 @@ const Expenses = () => {
     setEditingId(null);
     setFormData({
       amount: '',
-      category: 'Food',
+      category: 'Food & Dining',
+      subcategory: '',
       description: '',
       date: new Date().toISOString().split('T')[0],
-      budgetCategory: ''
+      budgetCategory: 'Need',
     });
   };
 
   const handleDelete = async (id) => {
-  try {
-    await api.delete(`/transactions/${id}`);
-    setExpenses(expenses.filter(exp => exp._id !== id));
-    setDeleteConfirm(null);
-  } catch {
-    toast.error('Failed to delete expense');
-  }
-};
-
-
-  const getCategoryIcon = (category) => {
-    const icons = {
-      Food: '🍔',
-      Transport: '🚗',
-      Entertainment: '🎬',
-      Shopping: '🛍️',
-      Bills: '📄',
-      Healthcare: '🏥',
-      Education: '📚',
-      Other: '📦'
-    };
-    return icons[category] || '📦';
+    try {
+      await api.delete(`/transactions/${id}`);
+      setExpenses(expenses.filter(exp => exp._id !== id));
+      setDeleteConfirm(null);
+      toast.success('Expense deleted successfully!');
+    } catch {
+      toast.error('Failed to delete expense');
+    }
   };
 
+  const currentSubcategories = getSubcategories(formData.category, 'expense');
   const totalExpenses = expenses.reduce((sum, exp) => sum + (Number(exp.amount) || 0), 0);
 
   return (
@@ -174,7 +191,7 @@ const Expenses = () => {
               <div className="form-row">
                 <div className="form-group">
                   <label htmlFor="amount" className="form-label">
-                    Amount (₹) *
+                    Amount ({formatCurrency(0)}) *
                   </label>
                   <input
                     type="number"
@@ -199,15 +216,37 @@ const Expenses = () => {
                     name="category"
                     className="form-input"
                     value={formData.category}
-                    onChange={handleChange}
+                    onChange={handleCategoryChange}
                     required
                   >
-                    {categories.map(cat => (
-                      <option key={cat} value={cat}>{getCategoryIcon(cat)} {cat}</option>
+                    {EXPENSE_CATEGORIES.map(cat => (
+                      <option key={cat.name} value={cat.name}>
+                        {cat.emoji} {cat.name}
+                      </option>
                     ))}
                   </select>
                 </div>
               </div>
+
+              {currentSubcategories.length > 0 && (
+                <div className="form-group">
+                  <label htmlFor="subcategory" className="form-label">
+                    Subcategory <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary, #9ca3af)', fontWeight: 400 }}>(Optional)</span>
+                  </label>
+                  <select
+                    id="subcategory"
+                    name="subcategory"
+                    className="form-input"
+                    value={formData.subcategory}
+                    onChange={handleChange}
+                  >
+                    <option value="">— Select a Subcategory (Optional) —</option>
+                    {currentSubcategories.map(sub => (
+                      <option key={sub} value={sub}>{sub}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               <div className="form-group">
                 <label htmlFor="description" className="form-label">
@@ -279,7 +318,7 @@ const Expenses = () => {
             <div className="list-header">
               <h2 className="list-title">Recent Expenses</h2>
               <div className="total-badge expense-badge">
-                Total: ₹{totalExpenses.toLocaleString()}
+                Total: {formatCurrency(totalExpenses)}
               </div>
             </div>
 
@@ -298,18 +337,21 @@ const Expenses = () => {
                 expenses.map(expense => (
                   <div key={expense._id || expense.id} className="transaction-item expense-item">
                     <div className="transaction-icon">
-                      {getCategoryIcon(expense.category)}
+                      {getCategoryIcon(expense.category, 'expense')}
                     </div>
                     <div className="transaction-details">
                       <p className="transaction-description">{expense.description || 'No description'}</p>
                       <p className="transaction-meta">
-                        <span className="transaction-category">{expense.category}</span>
+                        <span className="transaction-category">
+                          {expense.category}
+                          {expense.subcategory ? ` • ${expense.subcategory}` : ''}
+                        </span>
                         <span className="transaction-date">{expense.date?.split('T')[0]}</span>
                       </p>
                     </div>
                     <div className="transaction-right">
                       <div className="transaction-amount expense-amount">
-                        -₹{Number(expense.amount).toLocaleString()}
+                        -{formatCurrency(Number(expense.amount))}
                       </div>
                       <div className="transaction-actions">
                         <button 

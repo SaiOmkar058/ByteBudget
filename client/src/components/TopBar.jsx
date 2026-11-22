@@ -6,11 +6,17 @@ import { useAuth } from '../hooks/useAuth';
 const TopBar = ({ toggleSidebar, isSidebarOpen }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, logout, updatePreferences } = useAuth();
 
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
+  const [theme, setTheme] = useState(user?.preferences?.theme || localStorage.getItem('theme') || 'light');
+
+  useEffect(() => {
+    if (user?.preferences?.theme) {
+      setTheme(user.preferences.theme);
+    }
+  }, [user]);
 
   useEffect(() => {
     document.body.setAttribute('data-theme', theme);
@@ -30,6 +36,9 @@ const TopBar = ({ toggleSidebar, isSidebarOpen }) => {
     const nextTheme = theme === 'light' ? 'dark' : 'light';
     setTheme(nextTheme);
     localStorage.setItem('theme', nextTheme);
+    if (updatePreferences) {
+      updatePreferences({ theme: nextTheme }).catch(() => {});
+    }
   };
 
   const handleSearch = (e) => {

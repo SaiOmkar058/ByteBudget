@@ -15,7 +15,18 @@ import SalaryCalculator from './pages/SalaryCalculator';
 import Subscriptions from './pages/Subscriptions';
 import DebtTracker from './pages/DebtTracker';
 
-// Protected Route Component
+// Public Route Component (redirects authenticated users to /dashboard)
+const PublicRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return <div className="loading">Loading...</div>;
+  }
+
+  return user ? <Navigate to="/dashboard" replace /> : children;
+};
+
+// Protected Route Component (redirects unauthenticated users to /login)
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
 
@@ -23,7 +34,7 @@ const ProtectedRoute = ({ children }) => {
     return <div className="loading">Loading...</div>;
   }
 
-  return user ? children : <Navigate to="/login" />;
+  return user ? children : <Navigate to="/login" replace />;
 };
 
 function App() {
@@ -32,10 +43,26 @@ function App() {
       <Router>
         <div className="App">
           <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<Landing />}/>
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+            {/* Landing page: accessible to all, displays context-aware actions */}
+            <Route path="/" element={<Landing />} />
+
+            {/* Public-only routes: inaccessible to authenticated users */}
+            <Route
+              path="/login"
+              element={
+                <PublicRoute>
+                  <Login />
+                </PublicRoute>
+              }
+            />
+            <Route
+              path="/register"
+              element={
+                <PublicRoute>
+                  <Register />
+                </PublicRoute>
+              }
+            />
 
             {/* Protected Routes Wrapped under Layout */}
             <Route
@@ -59,7 +86,7 @@ function App() {
             </Route>
 
             {/* Catch-all: redirect unknown routes to landing */}
-            <Route path="*" element={<Navigate to="/" />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>
       </Router>

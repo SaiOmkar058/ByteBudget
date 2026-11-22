@@ -1,17 +1,25 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import api from '../services/api';
+import { formatCurrency } from '../utils/currency';
+import {
+  INCOME_CATEGORIES,
+  getCategoryIcon,
+  getSubcategories,
+  normalizeCategory,
+} from '../utils/categories';
 import '../styles/Transactions.css';
 
 const Income = () => {
-  const navigate = useNavigate();
+  const location = useLocation();
 
   const [formData, setFormData] = useState({
     amount: '',
     category: 'Salary',
+    subcategory: '',
     description: '',
-    date: new Date().toISOString().split('T')[0]
+    date: new Date().toISOString().split('T')[0],
   });
 
   const [incomes, setIncomes] = useState([]);
@@ -22,6 +30,13 @@ const Income = () => {
   useEffect(() => {
     fetchIncomes();
   }, []);
+
+  useEffect(() => {
+    if (location.state?.editTransaction?.type === 'income') {
+      handleEdit(location.state.editTransaction);
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   const fetchIncomes = async () => {
     try {
@@ -34,61 +49,72 @@ const Income = () => {
     }
   };
 
-  const categories = ['Salary', 'Freelance', 'Business', 'Investment', 'Pocket Money / Allowance', 'Gift', 'Bonus', 'Other'];
+  const handleCategoryChange = (e) => {
+    const newCategory = e.target.value;
+    const availableSubs = getSubcategories(newCategory, 'income');
+    setFormData((prev) => ({
+      ...prev,
+      category: newCategory,
+      subcategory: availableSubs.includes(prev.subcategory) ? prev.subcategory : '',
+    }));
+  };
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (!formData.amount || formData.amount <= 0) {
-    toast.error('Please enter a valid amount');
-    return;
-  }
-
-  try {
-    if (editingId) {
-      // Update income
-      const res = await api.put(`/transactions/${editingId}`, {
-        ...formData,
-        type: 'income',
-        amount: Number(formData.amount),
-      });
-      setIncomes(incomes.map(inc => inc._id === editingId ? res.data : inc));
-      toast.success('Income updated successfully!');
-      setEditingId(null);
-    } else {
-      // Add new income
-      const res = await api.post('/transactions', {
-        ...formData,
-        type: 'income',
-        amount: Number(formData.amount),
-      });
-      setIncomes([res.data, ...incomes]);
+    e.preventDefault();
+    if (!formData.amount || formData.amount <= 0) {
+      toast.error('Please enter a valid amount');
+      return;
     }
 
-    setFormData({
-      amount: '',
-      category: 'Salary',
-      description: '',
-      date: new Date().toISOString().split('T')[0]
-    });
-  } catch (error) {
-    toast.error(error.message || 'Failed to save income');
-  }
-};
+    try {
+      if (editingId) {
+        // Update income
+        const res = await api.put(`/transactions/${editingId}`, {
+          ...formData,
+          type: 'income',
+          amount: Number(formData.amount),
+        });
+        setIncomes(incomes.map(inc => inc._id === editingId ? res.data : inc));
+        toast.success('Income updated successfully!');
+        setEditingId(null);
+      } else {
+        // Add new income
+        const res = await api.post('/transactions', {
+          ...formData,
+          type: 'income',
+          amount: Number(formData.amount),
+        });
+        setIncomes([res.data, ...incomes]);
+        toast.success('Income added successfully!');
+      }
 
+      setFormData({
+        amount: '',
+        category: 'Salary',
+        subcategory: '',
+        description: '',
+        date: new Date().toISOString().split('T')[0],
+      });
+    } catch (error) {
+      toast.error(error.message || 'Failed to save income');
+    }
+  };
 
   const handleEdit = (income) => {
+    const normalizedCat = normalizeCategory(income.category, 'income');
     setFormData({
       amount: income.amount,
-      category: income.category,
-      description: income.description,
-      date: income.date.split('T')[0]
+      category: normalizedCat,
+      subcategory: income.subcategory || '',
+      description: income.description || '',
+      date: income.date ? income.date.split('T')[0] : new Date().toISOString().split('T')[0],
     });
     setEditingId(income._id);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -99,36 +125,24 @@ const Income = () => {
     setFormData({
       amount: '',
       category: 'Salary',
+      subcategory: '',
       description: '',
-      date: new Date().toISOString().split('T')[0]
+      date: new Date().toISOString().split('T')[0],
     });
   };
 
   const handleDelete = async (id) => {
-  try {
-    await api.delete(`/transactions/${id}`);
-    setIncomes(incomes.filter(inc => inc._id !== id));
-    setDeleteConfirm(null);
-  } catch {
-    toast.error('Failed to delete income');
-  }
-};
-
-
-  const getCategoryIcon = (category) => {
-    const icons = {
-      Salary: '💼',
-      Freelance: '💻',
-      Business: '🏢',
-      Investment: '📈',
-      'Pocket Money / Allowance': '👪',
-      Gift: '🎁',
-      Bonus: '💰',
-      Other: '💵'
-    };
-    return icons[category] || '💵';
+    try {
+      await api.delete(`/transactions/${id}`);
+      setIncomes(incomes.filter(inc => inc._id !== id));
+      setDeleteConfirm(null);
+      toast.success('Income deleted successfully!');
+    } catch {
+      toast.error('Failed to delete income');
+    }
   };
 
+  const currentSubcategories = getSubcategories(formData.category, 'income');
   const totalIncome = incomes.reduce((sum, inc) => sum + (Number(inc.amount) || 0), 0);
 
   return (
@@ -170,7 +184,7 @@ const Income = () => {
               <div className="form-row">
                 <div className="form-group">
                   <label htmlFor="amount" className="form-label">
-                    Amount (₹) *
+                    Amount ({formatCurrency(0)}) *
                   </label>
                   <input
                     type="number"
@@ -195,15 +209,37 @@ const Income = () => {
                     name="category"
                     className="form-input"
                     value={formData.category}
-                    onChange={handleChange}
+                    onChange={handleCategoryChange}
                     required
                   >
-                    {categories.map(cat => (
-                      <option key={cat} value={cat}>{getCategoryIcon(cat)} {cat}</option>
+                    {INCOME_CATEGORIES.map(cat => (
+                      <option key={cat.name} value={cat.name}>
+                        {cat.emoji} {cat.name}
+                      </option>
                     ))}
                   </select>
                 </div>
               </div>
+
+              {currentSubcategories.length > 0 && (
+                <div className="form-group">
+                  <label htmlFor="subcategory" className="form-label">
+                    Subcategory <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary, #9ca3af)', fontWeight: 400 }}>(Optional)</span>
+                  </label>
+                  <select
+                    id="subcategory"
+                    name="subcategory"
+                    className="form-input"
+                    value={formData.subcategory}
+                    onChange={handleChange}
+                  >
+                    <option value="">— Select a Subcategory (Optional) —</option>
+                    {currentSubcategories.map(sub => (
+                      <option key={sub} value={sub}>{sub}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               <div className="form-group">
                 <label htmlFor="description" className="form-label">
@@ -257,7 +293,7 @@ const Income = () => {
             <div className="list-header">
               <h2 className="list-title">Recent Income</h2>
               <div className="total-badge income-badge">
-                Total: ₹{totalIncome.toLocaleString()}
+                Total: {formatCurrency(totalIncome)}
               </div>
             </div>
 
@@ -276,18 +312,21 @@ const Income = () => {
                 incomes.map(income => (
                   <div key={income._id || income.id} className="transaction-item income-item">
                     <div className="transaction-icon">
-                      {getCategoryIcon(income.category)}
+                      {getCategoryIcon(income.category, 'income')}
                     </div>
                     <div className="transaction-details">
                       <p className="transaction-description">{income.description || 'No description'}</p>
                       <p className="transaction-meta">
-                        <span className="transaction-category">{income.category}</span>
+                        <span className="transaction-category">
+                          {income.category}
+                          {income.subcategory ? ` • ${income.subcategory}` : ''}
+                        </span>
                         <span className="transaction-date">{income.date?.split('T')[0]}</span>
                       </p>
                     </div>
                     <div className="transaction-right">
                       <div className="transaction-amount income-amount">
-                        +₹{Number(income.amount).toLocaleString()}
+                        +{formatCurrency(Number(income.amount))}
                       </div>
                       <div className="transaction-actions">
                         <button 

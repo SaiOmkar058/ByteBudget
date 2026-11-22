@@ -373,6 +373,19 @@
   border: 1px solid rgba(239, 68, 68, 0.15);
 }
 
+.subcategory-badge {
+  display: inline-block;
+  width: max-content;
+  font-size: 0.725rem;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  margin-left: 6px;
+  background-color: rgba(148, 163, 184, 0.12);
+  color: var(--text-secondary, #94a3b8);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
 /* Middle Section: Transaction Date */
 .transaction-middle-section {
   flex: 1;

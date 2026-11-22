@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import api from '../services/api';
+import { formatCurrency } from '../utils/currency';
 import '../styles/DebtTracker.css';
 
 const DEBT_TYPES = ['Home Loan', 'Car Loan', 'Personal Loan', 'Student Loan', 'Education Loan', 'Credit Card EMI', 'Consumer EMI', 'Other'];
@@ -191,14 +192,14 @@ const DebtTracker = () => {
           <div className="debt-summary-icon danger-icon">🏦</div>
           <div>
             <p className="debt-summary-label">Total Debt Principal</p>
-            <p className="debt-summary-value danger-val">₹{totalDebt.toLocaleString('en-IN')}</p>
+            <p className="debt-summary-value danger-val">{formatCurrency(totalDebt)}</p>
           </div>
         </div>
         <div className="debt-summary-card">
           <div className="debt-summary-icon warning-icon">📆</div>
           <div>
             <p className="debt-summary-label">Monthly EMI Outflow</p>
-            <p className="debt-summary-value warning-val">₹{totalMonthlyEMI.toLocaleString('en-IN')}</p>
+            <p className="debt-summary-value warning-val">{formatCurrency(totalMonthlyEMI)}</p>
           </div>
         </div>
         <div className="debt-summary-card">
@@ -220,7 +221,7 @@ const DebtTracker = () => {
               {simResult.processed.map((r, i) => (
                 <div key={i} className="sim-row">
                   <span className="sim-row-name">{r.debtName}</span>
-                  <span className="sim-row-detail">₹{Number(r.emiAmount).toLocaleString('en-IN')} • EMI {r.emisPaidNow}/{r.emisPaidNow + r.remainingEMIs}</span>
+                  <span className="sim-row-detail">{formatCurrency(Number(r.emiAmount))} • EMI {r.emisPaidNow}/{r.emisPaidNow + r.remainingEMIs}</span>
                 </div>
               ))}
             </div>
@@ -325,7 +326,7 @@ const DebtTracker = () => {
                     <div className="debt-type-badge">{debt.type}</div>
                     <h4 className="debt-name">{debt.name}</h4>
                     <p className="debt-meta">
-                      ₹{Number(debt.principalAmount).toLocaleString('en-IN')} @ {debt.interestRate}% p.a.
+                      {formatCurrency(Number(debt.principalAmount))} @ {debt.interestRate}% p.a.
                     </p>
                   </div>
                   <div className="debt-card-controls">
@@ -371,15 +372,15 @@ const DebtTracker = () => {
                 <div className="debt-amounts">
                   <div className="debt-amount-item">
                     <span className="debt-amount-label">Monthly EMI</span>
-                    <span className="debt-amount-val">₹{Number(debt.emiAmount).toLocaleString('en-IN')}</span>
+                    <span className="debt-amount-val">{formatCurrency(Number(debt.emiAmount))}</span>
                   </div>
                   <div className="debt-amount-item">
                     <span className="debt-amount-label">Paid So Far</span>
-                    <span className="debt-amount-val success-val">₹{amountPaid.toLocaleString('en-IN')}</span>
+                    <span className="debt-amount-val success-val">{formatCurrency(amountPaid)}</span>
                   </div>
                   <div className="debt-amount-item">
                     <span className="debt-amount-label">Outstanding</span>
-                    <span className="debt-amount-val danger-val">₹{amountRemaining.toLocaleString('en-IN')}</span>
+                    <span className="debt-amount-val danger-val">{formatCurrency(amountRemaining)}</span>
                   </div>
                 </div>
               </div>

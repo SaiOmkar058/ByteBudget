@@ -2,6 +2,7 @@ import React from 'react';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
+  LineController,
   CategoryScale,
   LinearScale,
   PointElement,
@@ -13,6 +14,7 @@ import {
 } from 'chart.js';
 
 ChartJS.register(
+  LineController,
   CategoryScale,
   LinearScale,
   PointElement,
@@ -127,3 +129,5 @@ export const ExpenseChart = ({ data, selectedPeriod, onPeriodChange }) => {
     </div>
   );
 };
+
+export default ExpenseChart;

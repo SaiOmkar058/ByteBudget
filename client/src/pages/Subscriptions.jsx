@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import api from '../services/api';
+import { formatCurrency } from '../utils/currency';
 import '../styles/Subscriptions.css';
 
 const SERVICE_ICONS = {
@@ -166,14 +167,14 @@ const Subscriptions = () => {
           <div className="subs-summary-icon">💳</div>
           <div>
             <p className="subs-summary-label">Monthly Cost</p>
-            <p className="subs-summary-value">₹{Math.round(totalMonthly).toLocaleString('en-IN')}</p>
+            <p className="subs-summary-value">{formatCurrency(Math.round(totalMonthly))}</p>
           </div>
         </div>
         <div className="subs-summary-card">
           <div className="subs-summary-icon">📅</div>
           <div>
             <p className="subs-summary-label">Yearly Cost</p>
-            <p className="subs-summary-value">₹{Math.round(totalYearly).toLocaleString('en-IN')}</p>
+            <p className="subs-summary-value">{formatCurrency(Math.round(totalYearly))}</p>
           </div>
         </div>
         <div className="subs-summary-card">
@@ -264,11 +265,11 @@ const Subscriptions = () => {
 
                 <div className="sub-card-body">
                   <div className="sub-amount-row">
-                    <span className="sub-amount">₹{Number(sub.amount).toLocaleString('en-IN')}</span>
+                    <span className="sub-amount">{formatCurrency(Number(sub.amount))}</span>
                     <span className="sub-cycle-badge">{sub.billingCycle === 'yearly' ? '/ year' : '/ month'}</span>
                   </div>
                   {sub.billingCycle === 'yearly' && (
-                    <p className="sub-monthly-equiv">≈ ₹{Math.round(monthlyEquivalent).toLocaleString('en-IN')} / month</p>
+                    <p className="sub-monthly-equiv">≈ {formatCurrency(Math.round(monthlyEquivalent))} / month</p>
                   )}
                 </div>
 

@@ -48,7 +48,14 @@ const updateDebt = async (req, res) => {
     if (debt.user.toString() !== req.user._id.toString()) {
       return res.status(401).json({ message: 'Not authorized' });
     }
-    const updated = await Debt.findByIdAndUpdate(req.params.id, req.body, {
+    const allowedFields = [
+      'name', 'type', 'principalAmount', 'interestRate', 'totalEMIs',
+      'emisPaid', 'emiAmount', 'automateEMI', 'startDate',
+    ];
+    const updates = Object.fromEntries(
+      Object.entries(req.body).filter(([key]) => allowedFields.includes(key))
+    );
+    const updated = await Debt.findByIdAndUpdate(req.params.id, updates, {
       new: true,
       runValidators: true,
     });

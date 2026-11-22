@@ -55,4 +55,7 @@ const debtSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+debtSchema.index({ user: 1, createdAt: -1 });
+debtSchema.index({ user: 1, automateEMI: 1 });
+
 module.exports = mongoose.model('Debt', debtSchema);

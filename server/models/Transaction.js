@@ -17,6 +17,11 @@ const transactionSchema = new mongoose.Schema(
       required: [true, 'Please add a category'],
       trim: true,
     },
+    subcategory: {
+      type: String,
+      trim: true,
+      default: '',
+    },
     amount: {
       type: Number,
       required: [true, 'Please add an amount'],
@@ -42,5 +47,9 @@ const transactionSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+transactionSchema.index({ user: 1, date: -1 });
+transactionSchema.index({ user: 1, type: 1 });
+transactionSchema.index({ user: 1, category: 1 });
 
 module.exports = mongoose.model('Transaction', transactionSchema);

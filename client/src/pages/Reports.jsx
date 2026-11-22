@@ -1,16 +1,24 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import api from '../services/api';
+import { formatCurrency } from '../utils/currency';
+import {
+  getCategoryColor,
+  normalizeCategory,
+  isInvestmentCategory,
+  isEarnedIncome,
+} from '../utils/categories';
 import '../styles/Reports.css';
 
 const Reports = () => {
-  const navigate = useNavigate();
-
   const [stats, setStats] = useState({
     totalIncome: 0,
     totalExpenses: 0,
     balance: 0,
-    savingsRate: 0
+    savingsRate: 0,
+    investmentsTotal: 0,
+    earnedIncomeTotal: 0,
+    inflowAdjustmentsTotal: 0,
   });
   const [monthlyData, setMonthlyData] = useState([]);
   const [categoryData, setCategoryData] = useState([]);
@@ -22,12 +30,50 @@ const Reports = () => {
         const txRes = await api.get('/transactions');
         const transactions = txRes.data || [];
 
-        // Calculate stats
-        const totalIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
-        const totalExpenses = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+        // Calculate stats and classifications
+        let totalIncome = 0;
+        let totalExpenses = 0;
+        let totalInvestments = 0;
+        let totalEarnedIncome = 0;
+        let totalInflowAdjustments = 0;
+
+        // Category breakdown (expenses only)
+        const categoryTotals = {};
+        let totalExpenseForPercent = 0;
+
+        transactions.forEach(t => {
+          const amt = Number(t.amount) || 0;
+          if (t.type === 'income') {
+            totalIncome += amt;
+            if (isEarnedIncome(t.category)) {
+              totalEarnedIncome += amt;
+            } else {
+              totalInflowAdjustments += amt;
+            }
+          } else if (t.type === 'expense') {
+            totalExpenses += amt;
+            if (isInvestmentCategory(t.category, t.subcategory) || t.budgetCategory === 'Savings/Investment') {
+              totalInvestments += amt;
+            }
+            if (t.category) {
+              const norm = normalizeCategory(t.category, 'expense');
+              categoryTotals[norm] = (categoryTotals[norm] || 0) + amt;
+              totalExpenseForPercent += amt;
+            }
+          }
+        });
+
         const balance = totalIncome - totalExpenses;
         const savingsRate = totalIncome ? Math.round(((totalIncome - totalExpenses) / totalIncome) * 100) : 0;
-        setStats({ totalIncome, totalExpenses, balance, savingsRate });
+        setStats({
+          totalIncome,
+          totalExpenses,
+          balance,
+          savingsRate,
+          investmentsTotal: totalInvestments,
+          earnedIncomeTotal: totalEarnedIncome,
+          inflowAdjustmentsTotal: totalInflowAdjustments,
+        });
 
         // Monthly trend (group by month)
         const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -39,24 +85,16 @@ const Reports = () => {
           if (t.type === 'income') monthlyMap[key].income += Number(t.amount) || 0;
           else monthlyMap[key].expenses += Number(t.amount) || 0;
         });
-        // Sort by date (descending), take last 6 months
+        // Present the six most recent months in chronological order.
         const sortedMonths = Object.values(monthlyMap)
           .sort((a, b) => {
             const [ma, ya] = a.month.split(' ');
             const [mb, yb] = b.month.split(' ');
-            return new Date(`${mb} 1, ${yb}`) - new Date(`${ma} 1, ${ya}`);
+            return new Date(`${ma} 1, ${ya}`) - new Date(`${mb} 1, ${yb}`);
           })
           .slice(-6);
         setMonthlyData(sortedMonths);
 
-        // Category breakdown (expenses only)
-        const categoryTotals = {};
-        let totalExpenseForPercent = 0;
-        transactions.filter(t => t.type === 'expense').forEach(t => {
-          if (!t.category) return;
-          categoryTotals[t.category] = (categoryTotals[t.category] || 0) + (Number(t.amount) || 0);
-          totalExpenseForPercent += Number(t.amount) || 0;
-        });
         const categoryArr = Object.entries(categoryTotals)
           .map(([category, amount]) => ({
             category,
@@ -66,25 +104,13 @@ const Reports = () => {
           .sort((a, b) => b.amount - a.amount);
         setCategoryData(categoryArr);
       } catch {
-        // Optionally show error
+        toast.error('Failed to load report data');
       } finally {
         setLoading(false);
       }
     };
     fetchReportData();
   }, []);
-
-  const getCategoryColor = (category) => {
-    const colors = {
-      Food: '#10b981',
-      Transport: '#3b82f6',
-      Entertainment: '#f59e0b',
-      Shopping: '#ef4444',
-      Bills: '#8b5cf6',
-      Others: '#6b7280'
-    };
-    return colors[category] || '#6b7280';
-  };
 
   return (
     <div className="reports-page">
@@ -97,8 +123,8 @@ const Reports = () => {
               <div className="summary-icon">📈</div>
               <div className="summary-content">
                 <p className="summary-label">Total Income</p>
-                <h2 className="summary-value">₹{stats.totalIncome.toLocaleString()}</h2>
-                <p className="summary-change positive">+12% from last month</p>
+                <h2 className="summary-value">{formatCurrency(stats.totalIncome)}</h2>
+                <p className="summary-change">All recorded income</p>
               </div>
             </div>
 
@@ -106,8 +132,8 @@ const Reports = () => {
               <div className="summary-icon">📉</div>
               <div className="summary-content">
                 <p className="summary-label">Total Expenses</p>
-                <h2 className="summary-value">₹{stats.totalExpenses.toLocaleString()}</h2>
-                <p className="summary-change negative">+5% from last month</p>
+                <h2 className="summary-value">{formatCurrency(stats.totalExpenses)}</h2>
+                <p className="summary-change">All recorded expenses</p>
               </div>
             </div>
 
@@ -115,8 +141,8 @@ const Reports = () => {
               <div className="summary-icon">💵</div>
               <div className="summary-content">
                 <p className="summary-label">Net Balance</p>
-                <h2 className="summary-value">₹{stats.balance.toLocaleString()}</h2>
-                <p className="summary-change positive">Healthy savings</p>
+                <h2 className="summary-value">{formatCurrency(stats.balance)}</h2>
+                <p className="summary-change">Income minus expenses</p>
               </div>
             </div>
 
@@ -148,12 +174,12 @@ const Reports = () => {
                       <div 
                         className="bar income-bar" 
                         style={{ height: `${incomeHeight}%` }}
-                        title={`Income: ₹${month.income.toLocaleString()}`}
+                        title={`Income: ${formatCurrency(month.income)}`}
                       ></div>
                       <div 
                         className="bar expense-bar" 
                         style={{ height: `${expenseHeight}%` }}
-                        title={`Expenses: ₹${month.expenses.toLocaleString()}`}
+                        title={`Expenses: ${formatCurrency(month.expenses)}`}
                       ></div>
                     </div>
                     <p className="bar-label">{month.month}</p>
@@ -186,7 +212,7 @@ const Reports = () => {
                   <div className="category-info">
                     <div className="category-name-row">
                       <span className="category-name">{item.category}</span>
-                      <span className="category-amount">₹{item.amount.toLocaleString()}</span>
+                      <span className="category-amount">{formatCurrency(item.amount)}</span>
                     </div>
                     <div className="progress-bar">
                       <div 
@@ -208,13 +234,41 @@ const Reports = () => {
           <div className="insights-card">
             <h3 className="insights-title">💡 Financial Insights</h3>
             <div className="insights-list">
+              {/* Dynamic: Investments & Savings Outflow */}
+              {stats.investmentsTotal > 0 && (
+                <div className="insight-item info-insight">
+                  <span className="insight-icon">📈</span>
+                  <div className="insight-content">
+                    <p className="insight-text">
+                      Investment & Savings Outflows: {formatCurrency(stats.investmentsTotal)}
+                    </p>
+                    <p className="insight-subtext">
+                      {stats.totalExpenses > 0 ? Math.round((stats.investmentsTotal / stats.totalExpenses) * 100) : 0}% of outflows dedicated to wealth creation (separated from consumption spending)
+                    </p>
+                  </div>
+                </div>
+              )}
+              {/* Dynamic: Inflow Breakdown */}
+              {stats.inflowAdjustmentsTotal > 0 && (
+                <div className="insight-item neutral-insight">
+                  <span className="insight-icon">💳</span>
+                  <div className="insight-content">
+                    <p className="insight-text">
+                      Refunds & Adjustments: {formatCurrency(stats.inflowAdjustmentsTotal)}
+                    </p>
+                    <p className="insight-subtext">
+                      Distinguished from regular earned income of {formatCurrency(stats.earnedIncomeTotal)}
+                    </p>
+                  </div>
+                </div>
+              )}
               {/* Dynamic: Savings Rate */}
               {stats.savingsRate > 25 && (
                 <div className="insight-item positive-insight">
                   <span className="insight-icon">✅</span>
                   <div className="insight-content">
                     <p className="insight-text">Great job! Your savings rate is above 25%</p>
-                    <p className="insight-subtext">You're saving ₹{stats.balance.toLocaleString()} this month</p>
+                    <p className="insight-subtext">Recorded balance: {formatCurrency(stats.balance)}</p>
                   </div>
                 </div>
               )}

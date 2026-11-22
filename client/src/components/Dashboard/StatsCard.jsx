@@ -1,35 +1,49 @@
 import React from 'react';
+import { FiTrendingUp, FiTrendingDown, FiCreditCard, FiTarget } from 'react-icons/fi';
+import { formatCurrency } from '../../utils/currency';
 
-export const StatsCard = ({ title, value, change }) => {
-  // Format the value with commas as thousand separators
-  const formattedValue = new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  }).format(value).replace('₹', '₹ ');
+const TYPE_CONFIG = {
+  income: {
+    icon: <FiTrendingUp size={32} color="#10b981" />,
+    badgeClass: 'income-badge',
+  },
+  expense: {
+    icon: <FiTrendingDown size={32} color="#ef4444" />,
+    badgeClass: 'expense-badge',
+  },
+  balance: {
+    icon: <FiCreditCard size={32} color="#3b82f6" />,
+    badgeClass: 'balance-badge',
+  },
+  budget: {
+    icon: <FiTarget size={32} color="#f59e0b" />,
+    badgeClass: 'budget-badge',
+  },
+};
+
+export const StatsCard = ({ type = 'income', title, value = 0, currency = 'INR', change }) => {
+  const config = TYPE_CONFIG[type] || TYPE_CONFIG.income;
+  const formattedValue = formatCurrency(value, currency);
 
   return (
-    <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100">
-      <div>
-        <p className="text-sm font-medium text-gray-500 mb-1">{title}</p>
-        <h3 className="text-2xl font-bold text-gray-800">{formattedValue}</h3>
+    <div className={`stat-card ${type}-card`}>
+      <div className="stat-icon">
+        {config.icon}
       </div>
-      {change !== undefined && (
-        <div className={`mt-3 text-sm font-medium flex items-center ${change >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-          {change >= 0 ? (
-            <span className="bg-green-100 px-2 py-0.5 rounded-full text-green-600 text-xs mr-1">
-              ↑ {Math.abs(change)}%
+      <div className="stat-content">
+        <p className="stat-label">{title}</p>
+        <h3 className="stat-value">{formattedValue}</h3>
+        {change !== undefined && (
+          <div className="stat-change">
+            <span className={change >= 0 ? 'positive-change' : 'negative-change'}>
+              {change >= 0 ? '↑' : '↓'} {Math.abs(change)}%
             </span>
-          ) : (
-            <span className="bg-red-100 px-2 py-0.5 rounded-full text-red-600 text-xs mr-1">
-              ↓ {Math.abs(change)}%
-            </span>
-          )}
-          <span className="text-gray-500 text-xs">vs last month</span>
-        </div>
-      )}
+            <span>vs last month</span>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
 
+export default StatsCard;
