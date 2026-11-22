@@ -8,9 +8,19 @@ const { initScheduler } = require('./cron/scheduler');
 const { startTelegramBot, stopTelegramBot } = require('./services/telegramBot');
 
 const path = require('path');
+const mongoose = require('mongoose');
 
 // Load environment variables
 dotenv.config({ path: path.join(__dirname, '.env') });
+
+// Validate required environment variables at backend startup
+const requiredEnvVars = ['MONGO_URI', 'JWT_SECRET'];
+const missingVars = requiredEnvVars.filter((key) => !process.env[key] || process.env[key].trim() === '');
+if (missingVars.length > 0) {
+  console.error(`❌ CRITICAL: Missing required environment variable(s): ${missingVars.join(', ')}`);
+  console.error('Please configure them in server/.env for local development or in hosting provider environment settings for production.');
+  process.exit(1);
+}
 
 // Connect to database
 connectDB();
@@ -23,20 +33,36 @@ const app = express();
 // Security HTTP headers
 app.use(helmet());
 
-// CORS configuration
-const allowedOrigins = process.env.CLIENT_URL
-  ? process.env.CLIENT_URL.split(',').map((url) => url.trim())
-  : ['http://localhost:5173', 'http://localhost:3000'];
+// CORS configuration supporting local development and production Netlify frontend
+const defaultOrigins = [
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'https://bytebudget-tracker.netlify.app',
+];
+
+const envOrigins = process.env.CLIENT_URL
+  ? process.env.CLIENT_URL.split(',').map((url) => url.trim().replace(/\/$/, '')).filter(Boolean)
+  : [];
+
+const allowedOrigins = Array.from(new Set([...defaultOrigins, ...envOrigins]));
 
 app.use(
   cors({
     origin: (origin, callback) => {
       // Allow requests with no origin (e.g. mobile apps, curl, server-to-server) or in dev
-      if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production') {
-        callback(null, true);
-      } else {
-        callback(new Error('Blocked by CORS policy'));
+      if (!origin || process.env.NODE_ENV !== 'production') {
+        return callback(null, true);
       }
+      const cleanOrigin = origin.replace(/\/$/, '');
+      if (
+        allowedOrigins.includes(cleanOrigin) ||
+        /^https:\/\/[a-zA-Z0-9\-_]+\.netlify\.app$/.test(cleanOrigin)
+      ) {
+        return callback(null, true);
+      }
+      return callback(null, false);
     },
     credentials: true,
   })
@@ -79,9 +105,21 @@ app.get('/', (req, res) => {
 });
 
 app.get('/health', (req, res) => {
-  res.json({
-    status: 'ok',
-    uptime: process.uptime(),
+  const dbState = mongoose.connection.readyState;
+  const dbStatusMap = {
+    0: 'disconnected',
+    1: 'connected',
+    2: 'connecting',
+    3: 'disconnecting',
+  };
+  const dbStatus = dbStatusMap[dbState] || 'unknown';
+  const isHealthy = dbState === 1;
+
+  res.status(isHealthy ? 200 : 503).json({
+    status: isHealthy ? 'ok' : 'degraded',
+    server: 'operational',
+    database: dbStatus,
+    uptime: Math.floor(process.uptime()),
     timestamp: new Date().toISOString(),
   });
 });
